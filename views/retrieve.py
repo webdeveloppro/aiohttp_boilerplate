@@ -12,7 +12,7 @@ class RetrieveView(ObjectView):
         self.fields = '*'
         self.where = ''
         self.params = {}
-        self.obj = self.get_model()
+        self.obj = self.get_model()()
 
     # Will be called before select query to database
     async def before_get(self):

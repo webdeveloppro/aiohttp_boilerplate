@@ -213,7 +213,7 @@ class ObjectView(SchemaOptionsView):
             # ToDo
             # User schema loads
             for f in self.schema().fields:
-                data[f] = getattr(raw_data, f)
+                data[f] = raw_data.get(f)
         else:
             data = self.obj.data
 
