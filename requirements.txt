@@ -1,0 +1,11 @@
+cython
+uvloop
+aiodns
+cchardet
+aiohttp
+asyncpg
+marshmallow
+PyJWT
+pytest
+pytest-aiohttp
+python-dateutil
