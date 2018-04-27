@@ -90,7 +90,6 @@ class SQL(object):
         self.params = params
         self.query = 'select {} from {}'.format(fields, self.table)
 
-
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params))
 

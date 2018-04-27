@@ -26,6 +26,7 @@ async def setup_connection(conn):
         encoder=_encoder,
         decoder=_decoder,
         schema='pg_catalog',
+        format='binary',
     )
 
 

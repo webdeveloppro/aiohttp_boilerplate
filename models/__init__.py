@@ -8,17 +8,30 @@ class ModelException(Exception):
 
 class Manager:
 
-    def __init__(self, is_list=False, conn=None):
-        self.is_list = False
+    def __init__(self, is_list=False, storage=None):
+        self.is_list = is_list
+
+        # ToDo
+        # Rename to self.get_table()
         self.table = self.__table__
-        self.sql = SQL(self.table, conn=conn)
+
         if is_list:
             self.data = []
         else:
             self.data = {
                 'id': None
             }
-        self.is_list = is_list
+
+        self.set_storage(self.table, storage)
+
+    def set_storage(self, table, storage):
+        '''
+        Will set a storage for model
+        Can me postgresql/reddis/anything else
+        '''
+        if storage is None:
+            storage = SQL
+        self.sql = storage(table)
 
     def __getattribute__(self, key):
 

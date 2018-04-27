@@ -3,11 +3,11 @@ import os.path
 
 CONFIG = {
     'postgres': {
-        'database': os.environ.get('POSTGRES_DATABASE', 'test'),
-        'password': os.environ.get('POSTGRES_PASSWORD', ''),
-        'user': os.environ.get('POSTGRES_USER', 'postgres'),
-        'host': os.environ.get('POSTGRES_HOST', 'localhost'),
-        'port': int(os.environ.get('POSTGRES_PORT', 5432)),
+        'database': os.environ.get('DB_DATABASE', 'test'),
+        'password': os.environ.get('DB_PASSWORD', ''),
+        'user': os.environ.get('DB_USER', 'postgres'),
+        'host': os.environ.get('DB_HOST', 'localhost'),
+        'port': int(os.environ.get('DB_PORT', 5432)),
         'min_size': int(os.environ.get('POSTGRES_MINSIZE', 5)),
         'max_size': int(os.environ.get('POSTGRES_MAXSIZE', 15)),
         'statement_cache_size': int(os.environ.get('STATEMENT_CACHE_SIZE', 0))
