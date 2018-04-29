@@ -49,7 +49,7 @@ class BaseTestCase(AioHTTPTestCase):
             con = await self.dbpool.acquire()
             for name, path in self.fixtures.items():
                 self.loaded_fixtures[name] = await self.load_fixture(path, con)
-                print("Loaded: {}: {}", path, len(self.loaded_fixtures[name]))
+                print("Loaded: {}: {}".format(path, len(self.loaded_fixtures[name])))
 
             await self.dbpool.release(con)
 
