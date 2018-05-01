@@ -33,10 +33,6 @@ class OptionsView(web.View):
     # Will return options request with fields meta data
     async def options(self):
 
-        # Check if its CORS request from google chrome/firefox/edge return empty body
-        if self.request.header.get("Accept") == "*/*":
-            return web.response('')
-
         return web.json_response(self._fields(self.schema()) if self.schema else {})
 
 
