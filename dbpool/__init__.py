@@ -3,8 +3,13 @@ import re
 import json
 
 from aiohttp_boilerplate.views import fixed_dump
-from aiohttp_boilerplate.config import CONFIG
+from aiohttp_boilerplate import config
 
+
+# Little trick to get convinient way of working with db connection
+# We will assign db pool connection during start appliction and destroy during shutdown
+# with db.DB_POOL variable
+DB_POOL = None
 
 # encoder/decoder is needed to work correctly with jsonb fields
 def _encoder(value):
@@ -30,29 +35,23 @@ async def setup_connection(conn):
     )
 
 
-async def create_connection(config=None, loop=None):
-
-    if config is None:
-        config = CONFIG['postgres']
+async def create_connection(conf, loop=None):
 
     return await asyncpg.connect(
-        **config,
+        **conf,
         loop=loop
     )
 
 
-async def create_pool(config=None, loop=None):
+async def create_pool(conf, loop=None):
 
-    if config is None:
-        config = CONFIG['postgres']
-
-    return await asyncpg.create_pool(
-        **config,
+    # ToDo
+    # Do we need if here?
+    # if DB_POOL is None?
+    DB_POOL = await asyncpg.create_pool(
+        **conf,
         loop=loop,
         setup=setup_connection
     )
 
-# Little trick to get convinient way of working with db connection
-# We will assign db pool connection during start appliction and destroy during shutdown
-# with db.DB_POOL variable
-DB_POOL = None
+    return DB_POOL

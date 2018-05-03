@@ -1,6 +1,7 @@
 import os
 import os.path
 
+# Create as a class
 CONFIG = {
     'postgres': {
         'database': os.environ.get('DB_DATABASE', 'test'),
@@ -12,6 +13,7 @@ CONFIG = {
         'max_size': int(os.environ.get('POSTGRES_MAXSIZE', 15)),
         'statement_cache_size': int(os.environ.get('STATEMENT_CACHE_SIZE', 0))
     },
+    'app_dir': os.environ.get('APP_DIR', 'app'),
     'domain': os.environ.get('DOMAIN', 'example.com'),
     'host': os.environ.get('HOST', 'localhost'),
     'port': int(os.environ.get('PORT', 8080)),
@@ -32,5 +34,5 @@ except ImportError:
 
 
 # Incase if you will have to load your config from file or database
-async def load_config():
+async def load_config(loop=None):
     return CONFIG
