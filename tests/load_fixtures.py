@@ -51,7 +51,7 @@ class LoadFixture:
 
         self.data = json.loads(open(filename, 'r').read())
 
-        await con.execute("truncate " + self.table)
+        await con.execute("TRUNCATE {} CASCADE".format(self.table))
 
         for row in self.data:
             field_names = []
