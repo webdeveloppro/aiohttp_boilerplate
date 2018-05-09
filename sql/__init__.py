@@ -2,7 +2,8 @@ import asyncio
 import re
 import sys
 
-from aiohttp_boilerplate import dbpool as db
+from aiohttp_boilerplate import dbpool
+from aiohttp_boilerplate.dbpool import pg as db
 from aiohttp_boilerplate.config import CONFIG
 
 
@@ -31,7 +32,7 @@ class SQL(object):
     async def get_connection(self):
         if self.conn is None:
             try:
-                self.conn = await db.DB_POOL.acquire()
+                self.conn = await dbpool.DB_POOL.acquire()
             except:
                 loop = asyncio.get_event_loop()
                 db.DB_POOL = await db.create_pool(loop=loop)
@@ -53,7 +54,7 @@ class SQL(object):
     async def release(self):
 
         if self.conn:
-            await db.DB_POOL.release(self.conn)
+            await dbpool.DB_POOL.release(self.conn)
             self.conn = None
 
     async def execute(self, query, params, fetch_method='execute'):

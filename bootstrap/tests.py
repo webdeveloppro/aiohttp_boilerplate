@@ -2,7 +2,7 @@ import asyncio
 
 from aiohttp_boilerplate import bootstrap
 from aiohttp_boilerplate import config
-from aiohttp_boilerplate.dbpool import tests as db_tests
+from aiohttp_boilerplate.dbpool import dummy
 
 
 @asyncio.coroutine
@@ -18,7 +18,7 @@ async def test_start_web_app(loop):
         'aiohttp_boilerplate.middleware.defaults.cross_origin_rules',
     ]
     config.CONFIG['app_dir'] = 'tests'
-    db_pool = db_tests.FakeDBPool()
+    db_pool = dummy.DBPool()
 
     app = bootstrap.start_web_app(config.CONFIG, db_pool, loop)
     assert callable(app.middlewares[0])
@@ -34,7 +34,7 @@ async def test_start_console_app(loop):
         - dbpool is created
     """
 
-    DBPool = db_tests.FakeDBPool()
+    DBPool = dummy.DBPool()
     app = bootstrap.console.start_console_app(
         conf=config.CONFIG,
         db_pool=DBPool,

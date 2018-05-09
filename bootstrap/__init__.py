@@ -5,9 +5,9 @@ import uvloop
 from aiohttp import web
 
 from aiohttp_boilerplate import config
-from aiohttp_boilerplate import dbpool
-from .console import start_console_app
-from .web import start_web_app
+from aiohttp_boilerplate.dbpool import pg as db
+from .console_app import start_console_app
+from .web_app import start_web_app
 
 __all__ = ('web_app', 'console_app', 'get_loop', )
 
@@ -24,7 +24,7 @@ def get_loop():
 def console_app():
     loop = get_loop()
     conf = loop.run_until_complete(config.load_config(loop=loop))
-    db_pool = loop.run_until_complete(dbpool.create_pool(
+    db_pool = loop.run_until_complete(db.create_pool(
         loop=loop,
         conf=conf['postgres']
     ))
@@ -35,9 +35,9 @@ def console_app():
 def web_app():
     loop = get_loop()
     conf = loop.run_until_complete(config.load_config(loop=loop))
-    db_pool = loop.run_until_complete(dbpool.create_pool(
+    db_pool = loop.run_until_complete(db.create_pool(
+        conf=conf['postgres'],
         loop=loop,
-        conf=conf['postgres']
     ))
     web_app = start_web_app(conf, db_pool, loop)
     web.run_app(web_app, host=conf['host'], port=conf['port'])
