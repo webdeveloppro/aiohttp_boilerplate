@@ -1,5 +1,4 @@
 import asyncio
-import mock
 
 from aiohttp_boilerplate import bootstrap
 from aiohttp_boilerplate import config

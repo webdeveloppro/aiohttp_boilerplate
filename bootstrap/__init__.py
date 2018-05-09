@@ -24,7 +24,10 @@ def get_loop():
 def console_app():
     loop = get_loop()
     conf = loop.run_until_complete(config.load_config(loop=loop))
-    db_pool = loop.run_until_complete(dbpool.create_pool(loop=loop, conf=conf))
+    db_pool = loop.run_until_complete(dbpool.create_pool(
+        loop=loop,
+        conf=conf['postgres']
+    ))
     console_app = start_console_app(conf, db_pool, loop)
     return console_app
 
@@ -32,6 +35,9 @@ def console_app():
 def web_app():
     loop = get_loop()
     conf = loop.run_until_complete(config.load_config(loop=loop))
-    db_pool = loop.run_until_complete(dbpool.create_pool(loop=loop, conf=conf))
+    db_pool = loop.run_until_complete(dbpool.create_pool(
+        loop=loop,
+        conf=conf['postgres']
+    ))
     web_app = start_web_app(conf, db_pool, loop)
     web.run_app(web_app, host=conf['host'], port=conf['port'])
