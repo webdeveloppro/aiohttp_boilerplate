@@ -3,20 +3,9 @@ class ConsoleApp:
     db_pool = None
 
 
-def start_console_app(conf=None, db_pool=None, loop=None):
-    # load config from yaml file in current dir
-
-    if loop is None:
-        loop = get_loop()
-
-    if config is None:
-        config = loop.run_until_complete(load_config())
-
-    if db_pool is None:
-        db_pool = loop.run_until_complete(db_pool.create_pool(config=conf, loop=loop))
-
+def start_console_app(conf, db_pool, loop=None):
     # setup application and extensions
     app = ConsoleApp()
-    app.conf = config
+    app.conf = conf
     app.db_pool = db_pool
-    return loop
+    return app

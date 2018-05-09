@@ -3,13 +3,13 @@ import re
 import json
 
 from aiohttp_boilerplate.views import fixed_dump
-from aiohttp_boilerplate import config
 
 
 # Little trick to get convinient way of working with db connection
 # We will assign db pool connection during start appliction and destroy during shutdown
 # with db.DB_POOL variable
 DB_POOL = None
+
 
 # encoder/decoder is needed to work correctly with jsonb fields
 def _encoder(value):
