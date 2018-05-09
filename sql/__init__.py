@@ -110,10 +110,11 @@ class SQL(object):
             print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
 
         try:
+            stmt = await self.conn.prepare(self.query)
             if many:
-                result = await self.conn.fetch(self.query, *self.params.values())
+                result = await stmt.fetch(*self.params.values())
             else:
-                result = await self.conn.fetchrow(self.query, *self.params.values())
+                result = await stmt.fetchrow(*self.params.values())
         finally:
             await self.release()
 
@@ -208,10 +209,8 @@ class SQL(object):
 
     async def is_exists(self, where, params):
 
-        # print('before connection ', self, where, params, 'q=', self.query, self.params)
         await self.get_connection()
 
-        # print('after connection ', self, where, params, 'q=', self.query, self.params)
         query = "SELECT 1 as t FROM {} WHERE {}".format(
             self.table,
             self.prepare_where(where, params)
