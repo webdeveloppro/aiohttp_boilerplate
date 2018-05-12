@@ -1,6 +1,5 @@
 from aiohttp import web
 
-from . import fixed_dump
 from .options import ObjectView
 from .exceptions import JSONHTTPError
 
@@ -12,7 +11,6 @@ class RetrieveView(ObjectView):
         self.fields = '*'
         self.where = ''
         self.params = {}
-        self.obj = self.get_model()()
 
     # Will be called before select query to database
     async def before_get(self):
@@ -54,7 +52,7 @@ class RetrieveView(ObjectView):
 
         await self.after_get()
         data = await self.get_data(self.obj.data)
-        return web.json_response(data, dumps=fixed_dump, status=200)
+        return self.json_response(data)
 
     async def get(self):
         return await self._get()
