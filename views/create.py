@@ -21,7 +21,7 @@ class CreateView(ObjectView):
                 - before_create method
             Calls obj.insert function
         '''
-        return await self.obj.insert(data)
+        return await self.obj.insert(data=data)
 
     async def before_create(self, data: dict) -> dict:
         ''' Runs after:
@@ -72,12 +72,11 @@ class CreateView(ObjectView):
             # Add logger
             return JSONHTTPError({'error': str(e)})
 
-        data = await self.before_create(data)
+        self.data.update(await self.before_create(data))
         try:
             self.obj.data['id'] = await self.perform_create(
-                data=data,
+                data=self.data,
             )
-
         except Exception as e:
             # ToDo
             # Add logger

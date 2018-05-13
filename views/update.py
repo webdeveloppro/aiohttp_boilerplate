@@ -1,4 +1,5 @@
 from aiohttp import web
+from aiohttp_boilerplate.config import CONFIG
 
 from .options import ObjectView
 from .exceptions import JSONHTTPError
@@ -71,13 +72,17 @@ class UpdateView(ObjectView):
             return JSONHTTPError({'error': 'No content'})
 
         try:
-            self.data = await self.validate(data)
+            data = await self.validate(data)
         except Exception as e:
             # ToDo
             # Add logger
+            if CONFIG['DEBUG'] > 0:
+                import traceback, sys
+                print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
+                print("Error: ", e, file=sys.stderr)
             return JSONHTTPError({'error': e})
 
-        await self.before_update()
+        self.data.update(await self.before_update(data))
         try:
             updated = await self.perform_update(
                 where=self.where,
@@ -90,14 +95,20 @@ class UpdateView(ObjectView):
         except Exception as e:
             # ToDo
             # Add logger
+            if CONFIG['DEBUG'] > 0:
+                import traceback, sys
+                traceback.print_exc(file=sys.stderr)
+                # print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
+                print("Error: ", e, file=sys.stderr)
+
             return JSONHTTPError(
                 {'error': str(e)},
                 web.HTTPInternalServerError
             )
 
         await self.after_update(self.data)
-        data = await self.get_data(self.obj.data)
-        return self.json_response(data)
+        response = await self.get_data(self.obj.data)
+        return self.json_response(response)
 
     async def _put(self):
         self.partial = False

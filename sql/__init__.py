@@ -119,23 +119,23 @@ class SQL(object):
 
         return result
 
-    async def insert(self, params: dict) -> int:
-        sql = params.pop('sql', '')
+    async def insert(self, data: dict) -> int:
+        on_conflict = data.pop('__on_conflict', '')
         self.query = 'insert into {}({}) values({}) {} RETURNING id'.format(
             self.table,
-            ','.join(params.keys()),
-            ','.join(['$%d' % (x+1) for x in range(0, params.__len__())]),
-            sql
+            ','.join(data.keys()),
+            ','.join(['$%d' % (x+1) for x in range(0, data.__len__())]),
+            on_conflict
         )
         # self.params = self._prepare_fields(params)
 
         await self.get_connection()
 
         if CONFIG['DEBUG'] > 0:
-            print(self.query, *params.values(), file=sys.stderr)
+            print(self.query, *data.values(), file=sys.stderr)
 
         try:
-            result = await self.conn.fetchval(self.query, *params.values())
+            result = await self.conn.fetchval(self.query, *data.values())
         finally:
             await self.release()
 
@@ -166,7 +166,7 @@ class SQL(object):
 
         return int(result.replace('UPDATE ', ''))
 
-    async def delete(self, where: str, params: dict) -> dict:
+    async def delete(self, where: str, params: dict) -> int:
         self.query = 'delete from {}'.format(self.table)
 
         if where:
