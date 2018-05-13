@@ -9,30 +9,57 @@ class UpdateView(ObjectView):
     def __init__(self, request):
         super().__init__(request)
 
+        # Can we update a part of schema data
         self.partial = True
         self.where = ''
         self.params = {}
         self.data = {}
 
-    async def validate(self, data):
-        """ Override that method for validation
+    async def validate(self, data: dict) -> dict:
+        """ Override that method for custom validation
         """
         return data
 
-    async def perform_update(self, where, params, data):
+    async def perform_update(self, where: str, params: dict, data: dict) -> dict:
+        ''' Runs after:
+                - successful validation method
+                - before_update method
+            Calls obj.update function
+        '''
         return await self.obj.update(where, params, data)
 
-    async def before_update(self):
-        pass
+    async def before_update(self, data: dict) -> dict:
+        ''' Runs after:
+                - successful validation method
+            If you want to change your data before system calls insert method
+            Use this method
+        '''
+        return data
 
-    async def after_update(self, data):
+    async def after_update(self, data: dict):
+        ''' Runs after:
+                - successful validation method
+                - before_create method
+                - perfom_create method
+            If you need to do anything after object updated
+            Do it here
+
+            new object data is self.obj
+        '''
         pass
 
     async def _patch(self):
+        ''' Post method handler, will run one by one
+            - on_start
+            - get_schema_data/get_data
+            - validate
+            - before_update
+            - perfomupdate
+            - after_update
+            - get_data
+        '''
 
         await self.on_start()
-        # data schema checking
-        self.obj.data['id'] = await self.get_id()
 
         data = {}
         if self.schema:
