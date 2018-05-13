@@ -1,5 +1,4 @@
 pyflakes
-flake8
 pytest-sugar
 pytest-cov
 pytest-mock
