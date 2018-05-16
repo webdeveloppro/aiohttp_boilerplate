@@ -120,7 +120,7 @@ class SchemaOptionsView(OptionsView):
         if hasattr(self, 'objects'):
             sql = self.objects.sql
 
-        sql.table = self.model.__table__ + """ as t0 """
+        sql.table = self.obj.__table__ + """ as t0 """
         if self.schema:
             schema = self.schema()
             for name, field in sorted(schema.fields.items()):
