@@ -1,8 +1,8 @@
 pyflakes
-flake8
 pytest-sugar
 pytest-cov
 pytest-mock
 pytest-timeout
 ipython
 mock==2.0.0
+pyre-check==0.0.5

@@ -138,9 +138,11 @@ class Manager:
 
         data.update(kwargs)
 
-        self.id = await self.sql.insert(params=data)
+        self.id = await self.sql.insert(data=data)
+
         if load == 1:
             await self.select(where='id={id}', params={'id': self.id})
+
         return self.id
 
     async def update(self, where='', params={}, data=None, **kwargs):

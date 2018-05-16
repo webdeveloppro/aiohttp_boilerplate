@@ -3,6 +3,7 @@ import warnings
 
 from aiohttp import web
 
+from . import fixed_dump
 from .exceptions import JSONHTTPError
 
 
@@ -15,25 +16,32 @@ class OptionsView(web.View):
 
     def __init__(self, request):
         super().__init__(request)
-        self.request_raw_data = None
+        self.request_data = None
 
     # On start will always run before any other methods
     async def on_start(self):
         pass
 
-    # Read data from request and save in request_raw_data
+    # Read data from request and save in request_data
     async def get_request_data(self, to_json=False):
-        if self.request_raw_data is None:
-            self.request_raw_data = await self.request.text()
-        if to_json is True:
-            json.loads(self.request_raw_data)
+        if self.request_data is None:
+            self.request_data = await self.request.text()
 
-        return self.request_raw_data
+        if to_json is True:
+            self.request_data = json.loads(self.request_data)
+
+        return self.request_data
 
     # Will return options request with fields meta data
     async def options(self):
-
         return web.json_response(self._fields(self.schema()) if self.schema else {})
+
+    def json_response(self, data, status=200):
+        return web.json_response(
+            data,
+            dumps=fixed_dump,
+            status=status,
+        )
 
 
 # Options request with a schema data
@@ -48,6 +56,39 @@ class SchemaOptionsView(OptionsView):
     def get_schema():
         warnings.warn('Redefine get_schema in inherited class', RuntimeWarning)
         return None
+
+    async def get_schema_data(self, partial=False, schema=None):
+
+        if schema is None:
+            schema = self.schema
+
+        data = await self.get_request_data()
+        if not data:
+            raise JSONHTTPError({'error': 'Empty data'})
+
+        try:
+            schema_result = schema().loads(data, partial=partial)
+        except Exception as e:
+            '''
+            ToDo
+            Create logging facility
+
+            raise web.HTTPBadRequest(
+                text=json.dumps(_non_field_errors(
+                    traceback.format_exc(3, 100))),
+                headers={
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers':
+                    'Authorization, X-PINGOTHER, Content-Type, X-Requested-With'
+                },
+                content_type='application/json')
+            '''
+            raise JSONHTTPError({'error': str(e)})
+
+        if len(schema_result.errors):
+            raise JSONHTTPError(schema_result.errors)
+
+        return schema_result.data
 
     # Will return options request with validation data for a frontend
     def _getValidation(self, field):
@@ -179,7 +220,7 @@ class ObjectView(SchemaOptionsView):
         super().__init__(request)
 
         self.id = None
-        self.obj = self.get_model()
+        self.obj = self.get_model()()
 
     # Return model object
     def get_model(self):
