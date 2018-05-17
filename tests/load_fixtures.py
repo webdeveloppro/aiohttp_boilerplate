@@ -1,3 +1,4 @@
+import datetime
 import json
 
 
@@ -70,4 +71,7 @@ class LoadFixture:
             )
             stmt = await con.prepare(sql)
 
+            if 'approved_date' in row.keys():
+                row['approved_date'] = datetime.datetime.fromtimestamp(row['approved_date'])
+                row['closing_date'] = datetime.datetime.fromtimestamp(row['closing_date'])
             await stmt.fetch(*row.values())

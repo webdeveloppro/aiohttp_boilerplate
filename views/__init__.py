@@ -1,3 +1,4 @@
+import datetime
 import decimal
 import sys
 import json
@@ -13,10 +14,10 @@ def fix_json(obj):
     # ToDo
     # should we install python-dateutils
     # Or just use this hack ?
-    # if isinstance(obj, datetime.datetime):
-    #    return obj.isoformat()
-    # if isinstance(obj, datetime.date):
-    #    return obj.isoformat()
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    if isinstance(obj, datetime.date):
+        return obj.isoformat()
     if type(obj) == memoryview:
         return bytes(obj)
     if type(obj) == bytes:
