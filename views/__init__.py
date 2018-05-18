@@ -2,6 +2,7 @@ import datetime
 import decimal
 import sys
 import json
+import types
 
 from functools import partial
 
@@ -20,8 +21,8 @@ def fix_json(obj):
         return obj.isoformat()
     if type(obj) == memoryview:
         return bytes(obj)
-    if type(obj) == bytes:
-        return obj.decode()
+    if isinstance(obj, types.MethodType):
+        return obj()
     print('unknown type: ', type(obj), obj, file=sys.stderr)
     raise TypeError
 

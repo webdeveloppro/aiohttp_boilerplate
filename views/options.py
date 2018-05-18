@@ -243,14 +243,17 @@ class ObjectView(SchemaOptionsView):
         return id
 
     # Return context for and object
-    async def get_data(self, raw_data):
+    async def get_data(self, obj):
 
         data = {}
         if self.schema:
             # ToDo
             # User schema loads
+            # ToDo
+            # Keep data in the bytes
+            # data = self.schema().dump(raw_data)
             for f in self.schema().fields:
-                data[f] = raw_data.get(f)
+                data[f] = getattr(obj, f)
         else:
             data = self.obj.data
 

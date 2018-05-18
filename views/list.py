@@ -76,7 +76,7 @@ class ListView(RetrieveView):
     async def get_data(self, objects):
         data = []
         for obj in objects:
-            data.append(await super().get_data(obj.data))
+            data.append(await super().get_data(obj))
 
         return data
 
