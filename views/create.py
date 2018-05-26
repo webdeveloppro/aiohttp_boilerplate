@@ -35,13 +35,17 @@ class CreateView(ObjectView):
         ''' Runs after:
                 - successful validation method
                 - before_create method
-                - perfom_create method
+                - perform_create method
             If you need to do anything after object created
             Do it here
 
             object id is self.obj.id
         '''
         pass
+
+    async def get_data(self, obj) -> dict:
+        ''' Return id of the object '''
+        return {'id': obj.id}
 
     async def _post(self):
         ''' Post method handler, will run one by one
@@ -86,8 +90,8 @@ class CreateView(ObjectView):
             )
 
         await self.after_create(data)
-        response = await self.get_data(self.obj.data)
-        return self.json_response(response)
+        response = await self.get_data(self.obj)
+        return self.json_response(response, 201)
 
     async def post(self):
         ''' Post logic is in _post method
