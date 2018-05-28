@@ -94,6 +94,9 @@ class SchemaOptionsView(OptionsView):
     def _getValidation(self, field):
         rules = {}
 
+        if getattr(field, 'get_validation', None):
+            return field.get_validation()
+
         if field.validate:
             for v in field.validate:
                 rules_name = v.__class__.__name__
