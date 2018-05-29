@@ -125,6 +125,10 @@ class SchemaOptionsView(OptionsView):
                         rules['max'] = v.max
                 else:
                     rules[rules_name.lower()] = rules_name
+
+        if field.required:
+            rules['required'] = field.required
+
         return rules
 
     # Return fields information and validation data
@@ -134,13 +138,11 @@ class SchemaOptionsView(OptionsView):
             name: {
                 'type': field.__class__.__name__.lower(),
                 'many': field.many,
-                'required': field.required,
                 'schema': self._fields(field.schema),
             } if field.__class__.__name__.lower() == 'nested'
             else {
                 'type': field.__class__.__name__.lower(),
                 'validate': self._getValidation(field),
-                'required': field.required
             } for name, field in schema.fields.items()}
 
     # Check if schema have NestedJoin Fields
