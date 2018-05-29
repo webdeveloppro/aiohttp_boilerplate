@@ -124,7 +124,7 @@ class SchemaOptionsView(OptionsView):
                     if v.max:
                         rules['max'] = v.max
                 else:
-                    rules['_' + rules_name] = rules_name
+                    rules[rules_name.lower()] = rules_name
         return rules
 
     # Return fields information and validation data
