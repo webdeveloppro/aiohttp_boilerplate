@@ -4,7 +4,7 @@ import sys
 
 from aiohttp_boilerplate import dbpool
 from aiohttp_boilerplate.dbpool import pg as db
-from aiohttp_boilerplate.config import CONFIG
+from aiohttp_boilerplate.config import config
 from aiohttp_boilerplate.sql import consts
 
 
@@ -62,7 +62,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        if CONFIG['DEBUG'] > 0:
+        if config['DEBUG'] > 0:
             print(self.query, self.params.values(), file=sys.stderr)
 
         try:
@@ -101,10 +101,10 @@ class SQL(object):
 
         await self.get_connection()
 
-        if CONFIG['DEBUG'] > 0:
+        if config['DEBUG'] > 0:
             print(self.query, self.params.values(), file=sys.stderr)
 
-        if CONFIG.get('TRACEBACK', 0) > 0:
+        if config.get('TRACEBACK', 0) > 0:
             import traceback
             print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
 
@@ -131,7 +131,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        if CONFIG['DEBUG'] > 0:
+        if config['DEBUG'] > 0:
             print(self.query, *data.values(), file=sys.stderr)
 
         try:
@@ -156,7 +156,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        if CONFIG['DEBUG'] > 0:
+        if config['DEBUG'] > 0:
             print(self.query, self.params.values(), file=sys.stderr)
 
         try:
@@ -176,7 +176,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        if CONFIG['DEBUG'] > 0:
+        if config['DEBUG'] > 0:
             print(self.query, self.params.values(), file=sys.stderr)
 
         try:
@@ -196,7 +196,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        if CONFIG['DEBUG'] > 0:
+        if config['DEBUG'] > 0:
             print(self.query, self.params.values(), file=sys.stderr)
 
         try:
@@ -218,7 +218,7 @@ class SQL(object):
         self.query = query
         self.params = params
 
-        if CONFIG['DEBUG'] > 0:
+        if config['DEBUG'] > 0:
             print(self.query, self.params.values(), file=sys.stderr)
 
         try:

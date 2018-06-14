@@ -1,5 +1,5 @@
 from aiohttp import web
-from aiohttp_boilerplate.config import CONFIG
+from aiohttp_boilerplate.config import config
 
 from .options import ObjectView
 from .exceptions import JSONHTTPError
@@ -76,7 +76,7 @@ class UpdateView(ObjectView):
         except Exception as e:
             # ToDo
             # Add logger
-            if CONFIG['DEBUG'] > 0:
+            if config['DEBUG'] > 0:
                 import traceback, sys
                 print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
                 print("Error: ", e, file=sys.stderr)
@@ -95,7 +95,7 @@ class UpdateView(ObjectView):
         except Exception as e:
             # ToDo
             # Add logger
-            if CONFIG['DEBUG'] > 0:
+            if config['DEBUG'] > 0:
                 import traceback, sys
                 traceback.print_exc(file=sys.stderr)
                 # print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)

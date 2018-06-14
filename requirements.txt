@@ -1,5 +1,6 @@
 cython
 uvloop
+ujson
 aiodns
 cchardet
 aiohttp

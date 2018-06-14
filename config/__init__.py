@@ -2,7 +2,7 @@ import os
 import os.path
 
 # Create as a class
-CONFIG = {
+config = {
     'postgres': {
         'database': os.environ.get('DB_DATABASE', 'test'),
         'password': os.environ.get('DB_PASSWORD', ''),
@@ -17,7 +17,7 @@ CONFIG = {
     'domain': os.environ.get('DOMAIN', 'example.com'),
     'host': os.environ.get('HOST', 'localhost'),
     'port': int(os.environ.get('PORT', 8080)),
-    'secret_key': os.environ.get('SECRET_KEY', 'TESTKEY123'),
+    'AUTH_URL': os.environ.get('AUTH_URL', ''),
     'DEBUG': int(os.environ.get('DEBUG', 0)),
     'middlewares': [
         'aiohttp_boilerplate.middleware.defaults.cross_origin_rules',
@@ -27,12 +27,12 @@ CONFIG = {
 
 # Will merge with app config
 try:
-    from app.config import CONFIG as APP_CONFIG
-    CONFIG.update(APP_CONFIG)
+    from app.config import config as APP_config
+    config.update(APP_config)
 except ImportError:
     pass
 
 
 # Incase if you will have to load your config from file or database
 async def load_config(loop=None):
-    return CONFIG
+    return config

@@ -14,13 +14,13 @@ async def test_start_web_app(loop):
         - call close on delete
     """
 
-    config.CONFIG['middlewares'] = [
+    config.config['middlewares'] = [
         'aiohttp_boilerplate.middleware.defaults.cross_origin_rules',
     ]
-    config.CONFIG['app_dir'] = 'tests'
+    config.config['app_dir'] = 'tests'
     db_pool = dummy.DBPool()
 
-    app = bootstrap.start_web_app(config.CONFIG, db_pool, loop)
+    app = bootstrap.start_web_app(config.config, db_pool, loop)
     assert callable(app.middlewares[0])
     assert callable(app.on_cleanup[0])
     assert callable(app.on_shutdown[0])
@@ -36,9 +36,9 @@ async def test_start_console_app(loop):
 
     DBPool = dummy.DBPool()
     app = bootstrap.console.start_console_app(
-        conf=config.CONFIG,
+        conf=config.config,
         db_pool=DBPool,
     )
 
-    assert app.conf == config.CONFIG
+    assert app.conf == config.config
     assert app.db_pool == DBPool
