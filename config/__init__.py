@@ -1,5 +1,6 @@
 import os
 import os.path
+import importlib
 
 # Create as a class
 config = {
@@ -27,9 +28,9 @@ config = {
 
 # Will merge with app config
 try:
-    from app.config import config as APP_config
-    config.update(APP_config)
-except ImportError:
+    APP = importlib.import_module(f"{config['app_dir']}.config")
+    config.update(APP.config)
+except ModuleNotFoundError:
     pass
 
 
