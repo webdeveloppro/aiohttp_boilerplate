@@ -3,8 +3,9 @@ from aiohttp import web
 
 
 # Sugar for transfer json message to string
-def JSONHTTPError(message, errorClass=None, headers={}):
+def JSONHTTPError(message, errorClass=None, headers=None):
     message = json.dumps(message)
+    headers = headers or {}
     headers['Content-Type'] = 'application/json'
 
     # ToDo

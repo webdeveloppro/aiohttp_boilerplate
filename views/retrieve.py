@@ -21,7 +21,7 @@ class RetrieveView(ObjectView):
         pass
 
     # Perform database select request
-    async def perform_get(self, fields="*", where="", params={}):
+    async def perform_get(self, fields="*", where="", params=None):
         if self.schema_have_joins():
             aliases, fields = self.join_prepare_fields(fields)
             raw_data = await self.obj.sql.select(

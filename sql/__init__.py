@@ -79,7 +79,8 @@ class SQL(object):
 
         return result
 
-    async def select(self, fields='*', where='', order='', limit='', params={}, many=False):
+    async def select(self, fields='*', where='', order='', limit='', params=None, many=False):
+        params = params or {}
 
         if self.table is None:
             raise SQLException('table is not set')
