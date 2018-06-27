@@ -1,12 +1,11 @@
 import json
 
-from marshmallow import fields, validate
+from marshmallow import fields, validate, Schema
 
 
 class JoinNested(fields.Nested):
 
     def __init__(self, **kwargs):
-
         self.table = kwargs.pop('table')
         self.joinOn = kwargs.pop('joinOn')
         self.joinType = kwargs.pop('joinType', 'JOIN')
@@ -57,7 +56,6 @@ class ChoiceConst(Choice):
         }
 
     def __init__(self, const_file, const_folder='const', **kwargs):
-
         file_name, const_name = const_file.rsplit('.', 1)
         file_name = file_name.replace('.', '/')
         file_path = const_folder + '/' + file_name + '.json'
@@ -65,3 +63,17 @@ class ChoiceConst(Choice):
         kwargs['choices'] = data[const_name]
         self.const_file = const_file
         super(Choice, self).__init__(**kwargs)
+
+
+class FileRow(Schema):
+    id = fields.Integer()
+    url = fields.String()
+    name = fields.Str()
+    mime = fields.Str()
+    bucket_id = fields.Int()
+    meta_data = fields.Dict()
+
+
+class FolderRow(Schema):
+    files = fields.Nested(FileRow, required=True, many=True)
+    meta_data = fields.Dict()
