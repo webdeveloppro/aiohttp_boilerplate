@@ -74,4 +74,6 @@ class LoadFixture:
             if 'approved_date' in row.keys():
                 row['approved_date'] = datetime.datetime.fromtimestamp(row['approved_date'])
                 row['closing_date'] = datetime.datetime.fromtimestamp(row['closing_date'])
+            if 'publication_date' in row.keys():
+                row['publication_date'] = datetime.datetime.fromtimestamp(row['publication_date'])
             await stmt.fetch(*row.values())
