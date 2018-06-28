@@ -29,7 +29,7 @@ async def cross_origin_rules(app, handler):
 # Return status: 200 response for /status200 url
 async def url_status_200(app, handler):
     async def middleware_handler(request):
-        if request.raw_path == '/status200':
+        if request.raw_path == '/healthcheck':
             response = web.Response(text="Ok")
         else:
             response = await handler(request)
