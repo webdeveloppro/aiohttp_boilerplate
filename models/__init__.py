@@ -65,10 +65,9 @@ class Manager:
         else:
             super().__setattr__(key, value)
 
-    def set_data(self, data={}):
+    def set_data(self, data=None):
 
-        if data is None:
-            data = {}
+        data = data or {}
 
         if type(data) != dict and hasattr(data, '__class__') is False:
             raise Exception('data should always be a dict or asyncpg Record class')
@@ -126,7 +125,7 @@ class Manager:
 
         return self
 
-    async def select(self, fields='*', where='', order='', limit='', params={}):
+    async def select(self, fields='*', where='', order='', limit='', params=None):
         data = await self.sql.select(fields=fields, where=where, order=order, limit=limit,
                                      params=params, many=self.is_list)
         self.set_data(data)
@@ -134,7 +133,8 @@ class Manager:
         # Create function get_data
         return self
 
-    async def insert(self, data={}, load=0, **kwargs):
+    async def insert(self, data=None, load=0, **kwargs):
+        data = data or {}
 
         data.update(kwargs)
 
@@ -145,7 +145,7 @@ class Manager:
 
         return self.id
 
-    async def update(self, where='', params={}, data=None, **kwargs):
+    async def update(self, where='', params=None, data=None, **kwargs):
         """
             Example:
                 user = await User.get_by_id(5)
@@ -159,6 +159,7 @@ class Manager:
                 )
         """
         data = data or {}
+        params = params or {}
         data.update(kwargs)
 
         if where == '':
@@ -171,8 +172,8 @@ class Manager:
         self.set_data(data)
         return updated
 
-    async def delete(self, where='', params={}):
-
+    async def delete(self, where='', params=None):
+        params = params or {}
         if self.is_list is False and self.id:
             where = where + ' id={id}'
             params['id'] = self.id
@@ -187,13 +188,14 @@ class Manager:
             self.id = None
         return deleted
 
-    async def get_count(self, where='', params={}):
+    async def get_count(self, where='', params=None):
 
         return await self.sql.get_count(where=where, params=params)
 
     @classmethod
-    async def is_exists(cls, where='', params={}, **kwargs):
+    async def is_exists(cls, where='', params=None, **kwargs):
         self = cls()
+        params = params or {}
         params.update(kwargs)
         new_params = params.copy()
         return await self.sql.is_exists(where, new_params)
@@ -201,7 +203,7 @@ class Manager:
 
 class JsonbManager(Manager):
 
-    async def select(self, fields='*', where='', order='', limit='', params={}):
+    async def select(self, fields='*', where='', order='', limit='', params=None):
 
         if fields == '*':
             fields = self.__key_name__

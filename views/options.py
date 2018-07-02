@@ -53,7 +53,7 @@ class SchemaOptionsView(OptionsView):
         super().__init__(request)
         self.schema = self.get_schema()
 
-    def get_schema():
+    def get_schema(self):
         warnings.warn('Redefine get_schema in inherited class', RuntimeWarning)
         return None
 

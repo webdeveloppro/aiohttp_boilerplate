@@ -35,7 +35,9 @@ class UnitTestCase(AioHTTPTestCase):
         self.conf = conf
         return app
 
-    async def request(self, url, method, data={}, headers={}):
+    async def request(self, url, method, data=None, headers=None):
+        data = data or {}
+        headers = headers or {}
 
         # Do Not share headers and data between tests
         _headers = headers.copy()

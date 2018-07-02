@@ -68,7 +68,8 @@ class ListView(RetrieveView):
     async def perform_get_count(self, where, params):
         return await self.objects.sql.get_count(where=where, params=params)
 
-    async def get_count(self, where='', params={}):
+    async def get_count(self, where='', params=None):
+        params = params or {}
         if self.count is None:
             self.count = await self.perform_get_count(where, params)
         return self.count
