@@ -28,15 +28,12 @@ def get_loop():
 async def migration_sql(dbpool, conf):
     if conf.get('DEBUG', False):
         logger = logging.getLogger('sql.migration')
-        base_dir = conf.get(
-            'BASE_DIR',
-            os.path.dirname(os.path.dirname(sys.modules['__main__'].__file__))
-        )
-        file = base_dir / Path('sql/migrations.sql')
+
+        file = Path('sql/migrations.sql')
 
         if file.exists():
             with file.open() as f:
-                logger.info("Read file sql/migration.sql")
+                logger.info("Read file sql/migrations.sql")
                 sql_query = f.read()
                 if sql_query:
                     async with dbpool.acquire() as conn:
