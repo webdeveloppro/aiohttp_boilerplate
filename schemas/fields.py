@@ -57,7 +57,10 @@ class ChoiceConst(Choice):
         }
 
     def __init__(self, const_file, const_folder='const', **kwargs):
-        file_name, const_name = const_file.rsplit('.', 1)
+        if '.' in const_file:
+            file_name, const_name = const_file.rsplit('.', 1)
+        else:
+            file_name, const_name = const_file, None
         file_name = file_name.replace('.', '/')
         file_path = const_folder + '/' + file_name + '.json'
         data = json.loads(open(file_path).read())
