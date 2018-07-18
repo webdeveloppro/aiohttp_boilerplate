@@ -60,7 +60,8 @@ class ChoiceConst(Choice):
         file_name = file_name.replace('.', '/')
         file_path = const_folder + '/' + file_name + '.json'
         data = json.loads(open(file_path).read())
-        kwargs['choices'] = data[const_name]
+        choices = data.get(const_name, data)
+        kwargs['choices'] = choices
         self.const_file = const_file
         super(Choice, self).__init__(**kwargs)
 
