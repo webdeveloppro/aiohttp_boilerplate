@@ -1,7 +1,7 @@
-pyflakes
+-e git+https://gitlab.com/pycqa/flake8#egg=flake8
 pytest-sugar
 pytest-cov
 pytest-mock
 pytest-timeout
 ipython
-pyre-check==0.0.7
+pyre-check
