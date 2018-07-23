@@ -79,7 +79,7 @@ class SQL(object):
 
         return result
 
-    async def select(self, fields='*', where='', order='', limit='', params=None, many=False):
+    async def select(self, fields='*', join='', where='', order='', limit='', params=None, many=False):
         params = params or {}
 
         if self.table is None:
@@ -90,6 +90,9 @@ class SQL(object):
 
         self.params = params
         self.query = 'select {} from {}'.format(fields, self.table)
+
+        if join:
+            self.query += ' join {}'.format(join)
 
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params))
