@@ -20,7 +20,6 @@ class JoinNested(fields.Nested):
 
 class Choice(fields.Raw):
     type = 'choice'
-    choices = None
 
     def get_validation(self):
         return {
@@ -43,7 +42,7 @@ class Choice(fields.Raw):
                 [choices[x] for x in choices],
             ))
         kwargs['validate'] = v
-        super(Choice, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
 class ChoiceConst(Choice):
@@ -66,7 +65,7 @@ class ChoiceConst(Choice):
         data = json.loads(open(file_path).read())
         choices = data.get(const_name, data)
         self.const_file = const_file
-        super(Choice, self).__init__(choices, **kwargs)
+        super().__init__(choices, **kwargs)
 
 
 class FileRow(Schema):
