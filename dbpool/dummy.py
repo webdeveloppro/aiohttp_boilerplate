@@ -21,6 +21,9 @@ class Connection(object):
     async def set_type_codec(*args, **kwargs):
         pass
 
+    async def prepare(self, *args, **kwargs):
+        return self
+
     def is_closed(self):
         return False
 

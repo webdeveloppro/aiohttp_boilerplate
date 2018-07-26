@@ -40,7 +40,7 @@ class SQL(object):
                 self.conn = await db.DB_POOL.acquire()
         return self.conn
 
-    def prepare_where(self, where: str, params: dict, index=0) -> str:
+    def prepare_where(self, where: str, params: dict, index: int = 0) -> str:
         for i, key in enumerate(params.keys()):
             where = where.replace('{{{}}}'.format(key), '${}'.format(i+index+1))
 
