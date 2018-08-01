@@ -7,8 +7,3 @@ aiohttp
 asyncpg
 marshmallow
 PyJWT
-flake8
-pytest
-pytest-aiohttp
-python-dateutil
-mock==2.0.0

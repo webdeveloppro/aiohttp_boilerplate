@@ -5,3 +5,8 @@ pytest-mock
 pytest-timeout
 ipython
 pyre-check
+flake8
+pytest
+pytest-aiohttp
+python-dateutil
+mock==2.0.0
