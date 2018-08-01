@@ -15,7 +15,7 @@ class JoinNested(fields.Nested):
                 'Please set foreign index name and table name'
                 'for join statement'
             )
-        super(JoinNested, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
 class Choice(fields.Raw):
