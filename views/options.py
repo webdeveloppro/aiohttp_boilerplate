@@ -147,10 +147,11 @@ class SchemaOptionsView(OptionsView):
 
     # Check if schema have NestedJoin Fields
     def schema_have_joins(self):
-        schema = self.schema()
-        for field in schema.fields:
-            if schema.fields[field].__class__.__name__ == 'JoinNested':
-                return True
+        if callable(self.schema):
+            schema = self.schema()
+            for field in schema.fields:
+                if schema.fields[field].__class__.__name__ == 'JoinNested':
+                    return True
         return False
 
     # Helper to convert data into beautifull json
@@ -180,13 +181,11 @@ class SchemaOptionsView(OptionsView):
                     )
                     alias['t{}'.format(t_index)] = name
                     subs = field.nested()
-                    for subf in subs.fields:
-                        fields += ",t{}.{} as t{}__{}".format(
-                            t_index,
-                            subf,
-                            t_index,
-                            subf
-                        )
+                    for subf_name, subf in subs.fields.items():
+                        if not subf.dump_only:
+                            fields += ",t{}.{} as t{}__{}".format(
+                                t_index, subf_name, t_index, subf_name
+                            )
                     t_index += 1
                 else:
                     fields += ",t0.%s as t0__%s" % (name, name)
