@@ -76,4 +76,6 @@ class LoadFixture:
                 row['closing_date'] = datetime.datetime.fromtimestamp(row['closing_date'])
             if 'publication_date' in row.keys():
                 row['publication_date'] = datetime.datetime.fromtimestamp(row['publication_date'])
+            if 'last_login' in row.keys():
+                row['last_login'] = datetime.datetime.fromisoformat(row['last_login'])
             await stmt.fetch(*row.values())
