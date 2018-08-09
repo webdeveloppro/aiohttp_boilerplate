@@ -77,7 +77,8 @@ class UpdateView(ObjectView):
             # ToDo
             # Add logger
             if config['DEBUG'] > 0:
-                import traceback, sys
+                import traceback
+                import sys
                 print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
                 print("Error: ", e, file=sys.stderr)
             return JSONHTTPError({'error': e})
@@ -96,7 +97,8 @@ class UpdateView(ObjectView):
             # ToDo
             # Add logger
             if config['DEBUG'] > 0:
-                import traceback, sys
+                import traceback
+                import sys
                 traceback.print_exc(file=sys.stderr)
                 # print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
                 print("Error: ", e, file=sys.stderr)

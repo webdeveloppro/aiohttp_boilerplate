@@ -34,7 +34,7 @@ class SQL(object):
         if self.conn is None:
             try:
                 self.conn = await dbpool.DB_POOL.acquire()
-            except:
+            except Exception:
                 loop = asyncio.get_event_loop()
                 db.DB_POOL = await db.create_pool(loop=loop)
                 self.conn = await db.DB_POOL.acquire()
