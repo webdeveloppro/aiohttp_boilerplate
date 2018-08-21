@@ -1,0 +1,31 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+uvloop = "*"
+ujson = "*"
+aiodns = "*"
+cchardet = "*"
+aiohttp = "*"
+asyncpg = "*"
+marshmallow = "*"
+Cython = "*"
+PyJWT = "*"
+
+[dev-packages]
+"flake8" = {editable = true, git = "https://gitlab.com/pycqa/flake8"}
+pytest-sugar = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest-timeout = "*"
+ipython = "*"
+pyre-check = "*"
+pytest = "*"
+pytest-aiohttp = "*"
+python-dateutil = "*"
+mock = "==2.0.0"
+
+[requires]
+python_version = "3.7"

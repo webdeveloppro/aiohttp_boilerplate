@@ -72,7 +72,7 @@ node_modules/
 djadmin/media/
 
 # Hitch directory
-tests/.hitch
+aiohttp_boilerplate/tests/.hitch
 
 # MailHog binary
 mailhog
@@ -81,13 +81,13 @@ mailhog
 local.yml
 
 # Local Settings
-config/settings/local.py
+aiohttp_boilerplate/config/settings/local.py
 
 .project
 .pydevproject
 .settings/
 ve/
-config/settings/local.py
+aiohttp_boilerplate/config/settings/local.py
 
 # Temp files
 temp/
