@@ -43,16 +43,16 @@ async def migration_sql(dbpool, conf):
                                 logger.error(f"Migration failed {e}")
 
 
-def console_app():
-    loop = get_loop()
+def console_app(loop=None):
+    if loop is None:
+        loop = get_loop()
     conf = loop.run_until_complete(config.load_config(loop=loop))
     db_pool = loop.run_until_complete(db.create_pool(
         loop=loop,
         conf=conf['postgres']
     ))
     loop.run_until_complete(migration_sql(db_pool, conf))
-    console_app = start_console_app(conf, db_pool, loop)
-    return console_app
+    return start_console_app(conf, db_pool, loop)
 
 
 def web_app():
