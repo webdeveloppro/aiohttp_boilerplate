@@ -55,7 +55,7 @@ def console_app():
     return console_app
 
 
-def web_app():
+def web_app(background_tasks=None):
     loop = get_loop()
     conf = loop.run_until_complete(config.load_config(loop=loop))
     db_pool = loop.run_until_complete(db.create_pool(
@@ -64,4 +64,8 @@ def web_app():
     ))
     loop.run_until_complete(migration_sql(db_pool, conf))
     web_app = start_web_app(conf, db_pool, loop)
+
+    if background_tasks:
+        web_app.on_startup.append(background_tasks)
+
     web.run_app(web_app, host=conf['host'], port=conf['port'])
