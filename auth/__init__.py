@@ -2,12 +2,12 @@ import ujson
 import aiohttp
 import jwt
 
-
 from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 from aiohttp_boilerplate.config import config
 
 
-async def validate_token(token):
+async def validate_token(token: str) -> str:
+    token = token.lstrip("Bearer").strip()
     if token is None or len(token) < 100:
         raise JSONHTTPError(
             {"__error__": "Authentication"},
