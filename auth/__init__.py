@@ -1,12 +1,14 @@
 import ujson
+from typing import Mapping
+
 import aiohttp
 import jwt
 
-from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 from aiohttp_boilerplate.config import config
+from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 
 
-async def validate_token(token: str) -> str:
+async def validate_token(token: str) -> Mapping:
     token = token.lstrip("Bearer").strip()
     if token is None or len(token) < 100:
         raise JSONHTTPError(
