@@ -17,7 +17,9 @@ __all__ = ('web_app', 'console_app', 'get_loop',)
 def get_loop():
     # TODO
     # Test logging
-    logging.basicConfig()
+    logging.basicConfig(
+        level=logging.DEBUG if config.config.get('DEBUG') else logging.INFO
+    )
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     loop = asyncio.get_event_loop()
     return loop
@@ -50,9 +52,7 @@ def console_app():
         loop=loop,
         conf=conf['postgres']
     ))
-    loop.run_until_complete(migration_sql(db_pool, conf))
-    console_app = start_console_app(conf, db_pool, loop)
-    return console_app
+    return start_console_app(conf, db_pool, loop)
 
 
 def web_app(background_tasks=None):
@@ -62,10 +62,9 @@ def web_app(background_tasks=None):
         conf=conf['postgres'],
         loop=loop,
     ))
-    loop.run_until_complete(migration_sql(db_pool, conf))
-    web_app = start_web_app(conf, db_pool, loop)
+    app = start_web_app(conf, db_pool, loop)
 
     if background_tasks:
-        web_app.on_startup.append(background_tasks)
+        app.on_startup.append(background_tasks)
 
-    web.run_app(web_app, host=conf['host'], port=conf['port'])
+    web.run_app(app, **conf['web_run'])
