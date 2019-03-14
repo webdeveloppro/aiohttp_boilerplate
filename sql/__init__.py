@@ -90,7 +90,10 @@ class SQL(object):
         self.query = 'select {} from {}'.format(fields, self.table)
 
         if join:
-            self.query += ' join {}'.format(join)
+            _join = ' {}'
+            if 'join' not in join.lower():
+                _join = ' join {}'
+            self.query += _join.format(join)
 
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params))
