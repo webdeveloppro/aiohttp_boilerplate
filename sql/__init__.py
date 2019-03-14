@@ -1,10 +1,10 @@
 import asyncio
 import re
-import sys
 
 from aiohttp_boilerplate import dbpool
-from aiohttp_boilerplate.dbpool import pg as db
 from aiohttp_boilerplate.config import config
+from aiohttp_boilerplate.dbpool import pg as db
+from aiohttp_boilerplate.log import sql_logger
 from aiohttp_boilerplate.sql import consts
 
 
@@ -12,15 +12,14 @@ class SQLException(Exception):
     pass
 
 
-# TODO
-# Use logging instead of print
 class SQL(object):
 
-    def __init__(self, table, conn=None):
+    def __init__(self, table, conn=None, logger=sql_logger):
         self.conn = conn
         self.table = table
         self.query = ''
         self.params = {}
+        self.logger = logger
 
     def __str__(self) -> str:
         return "{} {} {} {}".format(
@@ -42,7 +41,7 @@ class SQL(object):
 
     def prepare_where(self, where: str, params: dict, index: int = 0) -> str:
         for i, key in enumerate(params.keys()):
-            where = where.replace('{{{}}}'.format(key), '${}'.format(i+index+1))
+            where = where.replace('{{{}}}'.format(key), '${}'.format(i + index + 1))
 
         missing_params = re.findall(r'{.*}', where)
         if len(missing_params) > 0:
@@ -62,8 +61,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        if config['DEBUG'] > 0:
-            print(self.query, self.params.values(), file=sys.stderr)
+        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
 
         try:
             if fetch_method == consts.EXECUTE:
@@ -105,12 +103,11 @@ class SQL(object):
 
         await self.get_connection()
 
-        if config['DEBUG'] > 0:
-            print(self.query, self.params.values(), file=sys.stderr)
+        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
 
         if config.get('TRACEBACK', 0) > 0:
             import traceback
-            print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
+            self.logger.warn('\n'.join([str(line) for line in traceback.extract_stack()]))
 
         try:
             stmt = await self.conn.prepare(self.query)
@@ -128,15 +125,14 @@ class SQL(object):
         self.query = 'insert into {}({}) values({}) {} RETURNING id'.format(
             self.table,
             ','.join(data.keys()),
-            ','.join(['$%d' % (x+1) for x in range(0, data.__len__())]),
+            ','.join(['$%d' % (x + 1) for x in range(0, data.__len__())]),
             on_conflict
         )
         # self.params = self._prepare_fields(params)
 
         await self.get_connection()
 
-        if config['DEBUG'] > 0:
-            print(self.query, *data.values(), file=sys.stderr)
+        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.fetchval(self.query, *data.values())
@@ -150,7 +146,7 @@ class SQL(object):
 
         if data:
             self.query += ' set '
-            self.query += ','.join([key + '=$%d' % (i+1) for i, key in enumerate(data.keys())])
+            self.query += ','.join([key + '=$%d' % (i + 1) for i, key in enumerate(data.keys())])
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params, len(data)))
 
@@ -160,8 +156,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        if config['DEBUG'] > 0:
-            print(self.query, self.params.values(), file=sys.stderr)
+        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.execute(self.query, *self.params.values())
@@ -180,8 +175,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        if config['DEBUG'] > 0:
-            print(self.query, self.params.values(), file=sys.stderr)
+        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.execute(self.query, *params.values())
@@ -200,8 +194,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        if config['DEBUG'] > 0:
-            print(self.query, self.params.values(), file=sys.stderr)
+        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.fetchval(self.query, *params.values())
@@ -222,8 +215,7 @@ class SQL(object):
         self.query = query
         self.params = params
 
-        if config['DEBUG'] > 0:
-            print(self.query, self.params.values(), file=sys.stderr)
+        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.fetchval(self.query, *self.params.values())

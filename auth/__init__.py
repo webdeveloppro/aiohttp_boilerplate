@@ -1,13 +1,17 @@
 import ujson
+from typing import Mapping
+
 import aiohttp
 import jwt
 
-
-from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 from aiohttp_boilerplate.config import config
+from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 
 
-async def validate_token(token):
+async def validate_token(token: str) -> Mapping:
+    if token.startswith('Bearer '):
+        _, _, token = token.partition(' ')
+
     if token is None or len(token) < 100:
         raise JSONHTTPError(
             {"__error__": "Authentication"},
@@ -33,7 +37,7 @@ class Auth:
 
     async def auth_user(self, is_superadmin=False):
         self.user = await validate_token(
-            self.request.headers.get('Authorization')
+            self.request.headers.get('Authorization', '')
         )
 
         if is_superadmin:

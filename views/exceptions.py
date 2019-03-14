@@ -1,6 +1,8 @@
 import json
 from aiohttp import web
 
+from aiohttp_boilerplate.log import view_logger
+
 
 # Sugar for transfer json message to string
 def JSONHTTPError(message, errorClass=None, headers=None):
@@ -18,5 +20,7 @@ def JSONHTTPError(message, errorClass=None, headers=None):
 
     if errorClass is None:
         errorClass = web.HTTPBadRequest
+
+    view_logger.warn(f"{errorClass} Msg: {message}")
 
     return errorClass(body=message, headers=headers)

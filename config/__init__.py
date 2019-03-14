@@ -1,9 +1,15 @@
-import os
-import os.path
 import importlib
+import os.path
+
+from aiohttp_boilerplate.log.helpers import AccessLogger
 
 # Create as a class
 config = {
+    'web_run': {
+        'host': os.environ.get('HOST', 'localhost'),
+        'port': int(os.environ.get('PORT', 8080)),
+        'access_log_class': AccessLogger,
+    },
     'postgres': {
         'database': os.environ.get('DB_DATABASE', 'test'),
         'password': os.environ.get('DB_PASSWORD', ''),
@@ -16,8 +22,6 @@ config = {
     },
     'app_dir': os.environ.get('APP_DIR', 'app'),
     'domain': os.environ.get('DOMAIN', 'example.com'),
-    'host': os.environ.get('HOST', 'localhost'),
-    'port': int(os.environ.get('PORT', 8080)),
     'AUTH_URL': os.environ.get('AUTH_URL', ''),
     'DEBUG': int(os.environ.get('DEBUG', 0)),
     'middlewares': [
