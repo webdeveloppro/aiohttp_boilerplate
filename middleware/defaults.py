@@ -8,12 +8,11 @@ async def cross_origin_rules(app, handler):
         if app.conf.get('DEBUG') >= 1:
             allow = "*"
         else:
+            # Allow requests from subdomains
             if request.headers.get('origin', '').count(app.conf['domain']) == 0:
-                allow = "https://" + app.conf['domain']
+                allow = request.headers.get("scheme") + "://" + app.conf['domain']
             else:
                 allow = request.headers.get('origin')
-                if allow.startswith('http:/'):
-                    allow = allow.replace('http:', 'https:')
 
         response = await handler(request)
         response.headers['Access-Control-Allow-Origin'] = allow

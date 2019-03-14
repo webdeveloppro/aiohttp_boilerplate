@@ -102,3 +102,4 @@ env/*
 env.myvar
 .cache
 .pytest_cache
+.vscode
