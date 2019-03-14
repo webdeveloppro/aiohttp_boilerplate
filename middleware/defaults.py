@@ -10,9 +10,9 @@ async def cross_origin_rules(app, handler):
         else:
             # Allow requests from subdomains
             if request.headers.get('origin', '').count(app.conf['domain']) == 0:
-                allow = request.headers.get("scheme") + "://" + app.conf['domain']
+                allow = request.headers.get('scheme', 'https') + "://" + app.conf['domain']
             else:
-                allow = request.headers.get('origin')
+                allow = request.headers.get('origin', '')
 
         response = await handler(request)
         response.headers['Access-Control-Allow-Origin'] = allow
@@ -22,6 +22,7 @@ async def cross_origin_rules(app, handler):
             'Authorization, X-PINGOTHER, Content-Type, X-Requested-With'
 
         return response
+
     return middleware_handler
 
 
@@ -33,4 +34,5 @@ async def url_status_200(app, handler):
         else:
             response = await handler(request)
         return response
+
     return middleware_handler
