@@ -188,7 +188,8 @@ class SchemaOptionsView(OptionsView):
                             )
                     t_index += 1
                 else:
-                    fields += ",t0.%s as t0__%s" % (name, name)
+                    if not field.dump_only:
+                        fields += ",t0.%s as t0__%s" % (name, name)
 
         fields = fields[1:]
         return (alias, fields)
