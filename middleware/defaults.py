@@ -36,3 +36,25 @@ async def url_status_200(app, handler):
         return response
 
     return middleware_handler
+
+
+@web.middleware
+async def erase_header_server(request, handler):
+    try:
+        response = await handler(request)
+    except web.HTTPException as exc:
+        response = exc
+    except Exception:
+        response = web.Response(
+            status=500,
+            body='{"error":"Something went wrong"}',
+            content_type='application/json'
+        )
+        import traceback
+        import sys
+        exc_info = sys.exc_info()
+        traceback.print_exception(*exc_info)
+        del exc_info
+
+    response.headers['Server'] = ''
+    return response
