@@ -1,6 +1,6 @@
 import importlib
 
-from aiohttp import web
+from aiohttp import web, hdrs
 
 
 async def on_cleanup(app):
@@ -9,8 +9,11 @@ async def on_cleanup(app):
     await app.db_pool.close()
 
 
-def start_web_app(conf, db_pool, loop=None):
+async def on_prepare(request, response):
+    response.headers[hdrs.SERVER] = ''
 
+
+def start_web_app(conf, db_pool, loop=None):
     middlewares = []
 
     if conf.get('middlewares'):
@@ -27,6 +30,7 @@ def start_web_app(conf, db_pool, loop=None):
 
     app.on_cleanup.append(on_cleanup)
     app.on_shutdown.append(on_cleanup)
+    app.on_response_prepare.append(on_prepare)
 
     routes = importlib.import_module(conf['app_dir'] + '.routes')
     routes.setup_routes(app)

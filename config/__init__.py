@@ -27,7 +27,6 @@ config = {
     'middlewares': [
         'aiohttp_boilerplate.middleware.defaults.cross_origin_rules',
         'aiohttp_boilerplate.middleware.defaults.url_status_200',
-        'aiohttp_boilerplate.middleware.defaults.erase_header_server',
     ]
 }
 

@@ -1,4 +1,4 @@
-from aiohttp import web
+from aiohttp import web, hdrs
 
 
 # Restrict access for conf['domain'] domain and subdomains only
@@ -56,5 +56,5 @@ async def erase_header_server(request, handler):
         traceback.print_exception(*exc_info)
         del exc_info
 
-    response.headers['Server'] = ''
+    response.headers[hdrs.SERVER] = ''
     return response
