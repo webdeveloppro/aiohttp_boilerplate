@@ -40,7 +40,7 @@ class LoadFixture:
                 t = self.remove_ext(t)
                 idx = t.index("_")
                 int(t[0:idx])
-                t = t[idx+1:]
+                t = t[idx + 1:]
             except ValueError:
                 pass
 
@@ -64,7 +64,7 @@ class LoadFixture:
                 field_placeholders.append('${}'.format(i))
                 i += 1
             # FIXME
-            sql = "INSERT INTO {} ({}) VALUES ({})".format( # nosec
+            sql = "INSERT INTO {} ({}) VALUES ({})".format(  # nosec
                 self.table,
                 ','.join(field_names),
                 ','.join(field_placeholders)
