@@ -63,8 +63,8 @@ class LoadFixture:
                 field_names.append('"' + f + '"')
                 field_placeholders.append('${}'.format(i))
                 i += 1
-
-            sql = "INSERT INTO {} ({}) VALUES ({})".format(
+            # FIXME
+            sql = "INSERT INTO {} ({}) VALUES ({})".format( # nosec
                 self.table,
                 ','.join(field_names),
                 ','.join(field_placeholders)

@@ -249,7 +249,8 @@ class JsonbManager(Manager):
 
         data = fixed_dump(data)
 
-        query = "update {table} set {key}=jsonb_set({key}, '{{{index}}}', '{data}'::jsonb) ".format(
+        # FIXME
+        query = "update {table} set {key}=jsonb_set({key}, '{{{index}}}', '{data}'::jsonb) ".format( # nosec
             table=self.table,
             key=self.__key_name__,
             data=data.replace("'", ""),
@@ -267,8 +268,8 @@ class JsonbManager(Manager):
         return result
 
     async def delete(self, where, params):
-
-        query = "UPDATE {table} SET {key}={key}::jsonb-{index} ".format(
+        # FIXME
+        query = "UPDATE {table} SET {key}={key}::jsonb-{index} ".format( # nosec
                 table=self.table,
                 key=self.__key_name__,
                 index=params['index'],

@@ -87,7 +87,8 @@ class SQL(object):
             raise SQLException('params have to be dict')
 
         self.params = params
-        self.query = 'select {} from {}'.format(fields, self.table)
+        # FIXME
+        self.query = 'select {} from {}'.format(fields, self.table) # nosec
 
         if join:
             _join = ' {}'
@@ -169,7 +170,8 @@ class SQL(object):
         return int(result.replace('UPDATE ', ''))
 
     async def delete(self, where: str, params: dict) -> int:
-        self.query = 'delete from {}'.format(self.table)
+        # FIXME
+        self.query = 'delete from {}'.format(self.table) # nosec
 
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params))
@@ -188,7 +190,8 @@ class SQL(object):
         return int(result.replace('DELETE ', ''))
 
     async def get_count(self, where: str, params: dict) -> int:
-        self.query = 'select count(*) as count from {}'.format(self.table)
+        # FIXME
+        self.query = 'select count(*) as count from {}'.format(self.table) # nosec
 
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params))
@@ -209,8 +212,8 @@ class SQL(object):
     async def is_exists(self, where: str, params: dict) -> bool:
 
         await self.get_connection()
-
-        query = "SELECT 1 as t FROM {} WHERE {}".format(
+        # FIXME
+        query = "SELECT 1 as t FROM {} WHERE {}".format( # nosec
             self.table,
             self.prepare_where(where, params)
         )
