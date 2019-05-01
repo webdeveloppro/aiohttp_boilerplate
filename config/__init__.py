@@ -24,6 +24,9 @@ config = {
     'domain': os.environ.get('DOMAIN', 'example.com'),
     'AUTH_URL': os.environ.get('AUTH_URL', ''),
     'DEBUG': int(os.environ.get('DEBUG', 0)),
+    'NAMESPACES': {
+        k[:-len('_NAMESPACE')]: v for k, v in os.environ.items() if k.endswith('_NAMESPACE')
+    },
     'middlewares': [
         'aiohttp_boilerplate.middleware.defaults.cross_origin_rules',
         'aiohttp_boilerplate.middleware.defaults.url_status_200',

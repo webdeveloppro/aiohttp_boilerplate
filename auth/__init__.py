@@ -9,8 +9,8 @@ from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 
 
 async def validate_token(token: str) -> Mapping:
-    if token.startswith('Bearer '):
-        _, _, token = token.partition(' ')
+    provider, _, _token = token.partition(' ')
+    namespace = config['NAMESPACES'].get(f'{provider.upper()}', '')
 
     if token is None or len(token) < 100:
         raise JSONHTTPError(
@@ -21,12 +21,12 @@ async def validate_token(token: str) -> Mapping:
     headers = {'Authorization': token}
     async with aiohttp.ClientSession(json_serialize=ujson, headers=headers) as session:
         async with session.get(config['AUTH_URL']) as resp:
-            if (resp.status != 204 and resp.status != 200):
+            if resp.status != 204 and resp.status != 200:
                 raise JSONHTTPError(
                     {"__error__": "Invalid key"},
                     aiohttp.web.HTTPForbidden,
                 )
-            return encode_token(token)
+            return {k[len(namespace):]: v for k, v in encode_token(_token).items()}
 
 
 def encode_token(token):
@@ -34,6 +34,8 @@ def encode_token(token):
 
 
 class Auth:
+    def __init__(self):
+        self.user = {}
 
     async def auth_user(self, is_superadmin=False):
         self.user = await validate_token(
