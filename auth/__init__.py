@@ -9,8 +9,10 @@ from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 
 
 async def validate_token(token: str) -> Mapping:
-    provider, _, _token = token.partition(' ')
-    namespace = config['NAMESPACES'].get(f'{provider.upper()}', '')
+    provider, namespace, _token = '', '', token
+    if len(token.split(' ')) == 2:
+        provider, _, _token = token.partition(' ')
+        namespace = config['NAMESPACES'].get(f'{provider.upper()}', '')
 
     if token is None or len(token) < 100:
         raise JSONHTTPError(
