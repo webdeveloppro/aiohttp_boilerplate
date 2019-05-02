@@ -7,12 +7,13 @@ import jwt
 from aiohttp_boilerplate.config import config
 from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 
+CLAIM_FIELDS = ['user_id', 'email', 'is_superuser', 'is_staff']
+
 
 async def validate_token(token: str) -> Mapping:
-    provider, namespace, _token = '', '', token
+    _token = token
     if len(token.split(' ')) == 2:
-        provider, _, _token = token.partition(' ')
-        namespace = config['NAMESPACES'].get(f'{provider.upper()}', '')
+        _, _, _token = token.partition(' ')
 
     if token is None or len(token) < 100:
         raise JSONHTTPError(
@@ -28,7 +29,14 @@ async def validate_token(token: str) -> Mapping:
                     {"__error__": "Invalid key"},
                     aiohttp.web.HTTPForbidden,
                 )
-            return {k[len(namespace):]: v for k, v in encode_token(_token).items()}
+
+            claims = {}
+            for k, v in encode_token(_token).items():
+                for f in CLAIM_FIELDS:
+                    if k.endswith(f):
+                        claims[f] = v
+
+            return claims
 
 
 def encode_token(token):
