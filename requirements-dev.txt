@@ -6,4 +6,4 @@ pyre-check
 pytest
 pytest-aiohttp
 python-dateutil
-mock==2.0.0
+mock==3.0.5
