@@ -1,4 +1,4 @@
-import aiohttp.helpers as aio_helpers
+import aiohttp.web_log as aio_helpers
 
 
 class AccessLogger(aio_helpers.AccessLogger):
