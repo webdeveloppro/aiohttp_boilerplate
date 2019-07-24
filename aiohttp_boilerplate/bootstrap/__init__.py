@@ -45,8 +45,10 @@ async def migration_sql(dbpool, conf):
                                 logger.error(f"Migration failed {e}")
 
 
-def console_app():
-    loop = get_loop()
+def console_app(loop=None):
+    if loop is None:
+        loop = get_loop()
+
     conf = loop.run_until_complete(config.load_config(loop=loop))
     db_pool = loop.run_until_complete(db.create_pool(
         loop=loop,
