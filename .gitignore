@@ -103,3 +103,6 @@ env.myvar
 .cache
 .pytest_cache
 .vscode
+
+dist/
+poetry.lock
