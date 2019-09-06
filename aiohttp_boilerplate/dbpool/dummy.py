@@ -1,6 +1,14 @@
 from aiohttp_boilerplate import dbpool
 
 
+class Transaction:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
 class Connection(object):
 
     def __init__(self):
@@ -29,6 +37,9 @@ class Connection(object):
 
     async def add_listener(self, channel, callback):
         return self.return_data
+
+    def transaction(self):
+        return Transaction()
 
 
 class DBPool(object):

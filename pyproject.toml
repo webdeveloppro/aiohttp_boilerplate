@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aiohttp-boilerplate"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Vladyslav Tarasenko <vladka@webdevelop.pro>"]
 license = "MIT"
