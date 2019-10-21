@@ -51,8 +51,7 @@ class RetrieveView(ObjectView):
             )
 
         await self.after_get()
-        data = await self.get_data(self.obj)
-        return self.json_response(data)
+        return await self.get_data(self.obj)
 
     async def get(self):
-        return await self._get()
+        return self.json_response(await self._get())

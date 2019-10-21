@@ -1,7 +1,5 @@
 import warnings
-from aiohttp import web
 
-from . import fixed_dump
 from .retrieve import RetrieveView
 
 
@@ -42,7 +40,7 @@ class ListView(RetrieveView):
 
         return beautiful_data
 
-    async def perform_get(self, fields, where, order, limit, params):
+    async def perform_get(self, fields="", where="", order="", limit=50, params=None):
         # ToDo
         # Can we do this without if/else, just always run join_prepare/beautiful_fields?
         if self.schema_have_joins():
@@ -94,14 +92,13 @@ class ListView(RetrieveView):
         )
         await self.after_get()
 
-        data = {
+        return {
             'data': await self.get_data(self.objects.data),
             'count': await self.get_count(
                 where=self.where,
                 params=self.params,
             )
         }
-        return web.json_response(data, dumps=fixed_dump, status=200)
 
     async def get(self):
-        return await self._get()
+        return self.json_response(await self._get())
