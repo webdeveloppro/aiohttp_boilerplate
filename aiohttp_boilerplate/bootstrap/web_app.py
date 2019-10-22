@@ -32,6 +32,14 @@ def start_web_app(conf, db_pool, loop=None):
     app.on_shutdown.append(on_cleanup)
     app.on_response_prepare.append(on_prepare)
 
+    # setup background tasks
+    try:
+        tasks = importlib.import_module(conf['app_dir'] + '.tasks')
+        if hasattr(tasks, 'setup'):
+            tasks.setup(app)
+    except ModuleNotFoundError:
+        pass
+
     routes = importlib.import_module(conf['app_dir'] + '.routes')
     routes.setup_routes(app)
     return app

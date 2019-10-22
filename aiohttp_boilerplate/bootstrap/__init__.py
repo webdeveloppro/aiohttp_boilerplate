@@ -57,7 +57,7 @@ def console_app(loop=None):
     return start_console_app(conf, db_pool, loop)
 
 
-def web_app(background_tasks=None):
+def web_app():
     loop = get_loop()
     conf = loop.run_until_complete(config.load_config(loop=loop))
     db_pool = loop.run_until_complete(db.create_pool(
@@ -65,8 +65,4 @@ def web_app(background_tasks=None):
         loop=loop,
     ))
     app = start_web_app(conf, db_pool, loop)
-
-    if background_tasks:
-        app.on_startup.append(background_tasks)
-
     web.run_app(app, **conf['web_run'])

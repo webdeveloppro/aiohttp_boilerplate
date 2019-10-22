@@ -22,6 +22,9 @@ class OptionsView(web.View):
     async def on_start(self):
         pass
 
+    async def _fields(self, schema):
+        return {}
+
     # Read data from request and save in request_data
     async def get_request_data(self, to_json=False):
         if self.request_data is None:
@@ -32,11 +35,15 @@ class OptionsView(web.View):
 
         return self.request_data
 
+    async def _options(self):
+        return self._fields(self.schema()) if hasattr(self, 'schema') else {}
+
     # Will return options request with fields meta data
     async def options(self):
-        return web.json_response(self._fields(self.schema()) if hasattr(self, 'schema') else {})
+        return self.json_response(await self.options())
 
-    def json_response(self, data, status=200):
+    @staticmethod
+    def json_response(data, status=200):
         return web.json_response(
             data,
             dumps=fixed_dump,
