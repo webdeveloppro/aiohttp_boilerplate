@@ -40,7 +40,7 @@ class OptionsView(web.View):
 
     # Will return options request with fields meta data
     async def options(self):
-        return self.json_response(await self.options())
+        return self.json_response(await self._options())
 
     @staticmethod
     def json_response(data, status=200):
