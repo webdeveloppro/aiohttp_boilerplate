@@ -67,14 +67,14 @@ class CreateView(ObjectView):
             data = await self.get_request_data(to_json=True)
 
         if len(data) == 0:
-            return JSONHTTPError({'error': 'No content'})
+            raise JSONHTTPError({'error': 'No content'})
 
         try:
             data = await self.validate(data)
         except Exception as e:
             # ToDo
             # Add logger
-            return JSONHTTPError({'error': str(e)})
+            raise JSONHTTPError({'error': str(e)})
 
         self.data.update(await self.before_create(data))
         try:
@@ -84,7 +84,7 @@ class CreateView(ObjectView):
         except Exception as e:
             # ToDo
             # Add logger
-            return JSONHTTPError(
+            raise JSONHTTPError(
                 {'error': str(e)},
                 web.HTTPInternalServerError
             )

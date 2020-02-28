@@ -69,7 +69,7 @@ class UpdateView(ObjectView):
             data = await self.get_request_data(to_json=True)
 
         if len(data) == 0:
-            return JSONHTTPError({'error': 'No content'})
+            raise JSONHTTPError({'error': 'No content'})
 
         try:
             data = await self.validate(data)
@@ -81,7 +81,7 @@ class UpdateView(ObjectView):
                 import sys
                 print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
                 print("Error: ", e, file=sys.stderr)
-            return JSONHTTPError({'error': e})
+            raise JSONHTTPError({'error': e})
 
         self.data.update(await self.before_update(data))
         try:
@@ -91,7 +91,7 @@ class UpdateView(ObjectView):
                 data=self.data,
             )
             if updated == 0:
-                return JSONHTTPError({'error': 'No object updated'})
+                raise JSONHTTPError({'error': 'No object updated'})
 
         except Exception as e:
             # ToDo
@@ -103,7 +103,7 @@ class UpdateView(ObjectView):
                 # print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
                 print("Error: ", e, file=sys.stderr)
 
-            return JSONHTTPError(
+            raise JSONHTTPError(
                 {'error': str(e)},
                 web.HTTPInternalServerError
             )
