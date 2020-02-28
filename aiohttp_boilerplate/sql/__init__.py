@@ -139,7 +139,7 @@ class SQL(object):
         self.logger.debug(f'query: %s, values: %s', self.query, data.values())
 
         try:
-            result = await self.conn.execute(self.query, *data.values())
+            result = await self.conn.fetchval(self.query, *data.values())
         finally:
             await self.release()
 
