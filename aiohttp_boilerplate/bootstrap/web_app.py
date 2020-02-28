@@ -24,7 +24,7 @@ def start_web_app(conf, db_pool, loop=None):
             middlewares.append(met)
 
     # setup application and extensions
-    app = web.Application(loop=loop, middlewares=middlewares)
+    app = web.Application(middlewares=middlewares)
     app.conf = conf
     app.db_pool = db_pool
 

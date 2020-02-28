@@ -35,7 +35,7 @@ class SQL(object):
                 self.conn = await dbpool.DB_POOL.acquire()
             except Exception:
                 loop = asyncio.get_event_loop()
-                db.DB_POOL = await db.create_pool(loop=loop)
+                db.DB_POOL = await db.create_pool(config, loop=loop)
                 self.conn = await db.DB_POOL.acquire()
         return self.conn
 
@@ -111,7 +111,7 @@ class SQL(object):
 
         if config.get('TRACEBACK', 0) > 0:
             import traceback
-            self.logger.warn('\n'.join([str(line) for line in traceback.extract_stack()]))
+            self.logger.warning('\n'.join([str(line) for line in traceback.extract_stack()]))
 
         try:
             stmt = await self.conn.prepare(self.query)
@@ -136,10 +136,10 @@ class SQL(object):
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        self.logger.debug(f'query: %s, values: %s', self.query, data.values())
 
         try:
-            result = await self.conn.fetchval(self.query, *data.values())
+            result = await self.conn.execute(self.query, *data.values())
         finally:
             await self.release()
 
