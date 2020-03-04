@@ -35,7 +35,7 @@ class SQL(object):
                 self.conn = await dbpool.DB_POOL.acquire()
             except Exception:
                 loop = asyncio.get_event_loop()
-                db.DB_POOL = await db.create_pool(config, loop=loop)
+                db.DB_POOL = await db.create_pool(config['postgres'], loop=loop)
                 self.conn = await db.DB_POOL.acquire()
         return self.conn
 
