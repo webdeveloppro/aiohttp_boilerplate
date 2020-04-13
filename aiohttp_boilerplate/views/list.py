@@ -4,12 +4,14 @@ from .retrieve import RetrieveView
 
 
 class ListView(RetrieveView):
+    default_limit = "50"
 
     def __init__(self, request):
         super().__init__(request)
         self.objects = self.get_objects()
         self.limit = self.get_limit()
         self.order = self.get_order()
+        self.offset = self.get_offset()
         self.count = None
 
     # Return model object
@@ -21,11 +23,23 @@ class ListView(RetrieveView):
     def get_objects(self):
         return self.get_model()(is_list=True)
 
+    @staticmethod
+    def str_to_int(value: str):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = None
+        return value
+
     # Return limit for sql query
     def get_limit(self):
         # TODO
         # Create consts for default limit amount
-        return self.request.query.get('limit', 50)
+        return self.str_to_int(self.request.query.get('limit', self.default_limit))
+
+    # Return offset for sql query
+    def get_offset(self):
+        return self.str_to_int(self.request.query.get("offset"))
 
     # Return order
     def get_order(self):
@@ -40,7 +54,7 @@ class ListView(RetrieveView):
 
         return beautiful_data
 
-    async def perform_get(self, fields="", where="", order="", limit=50, params=None):
+    async def perform_get(self, fields="", where="", order="", limit=50, offset=None, params=None):
         # ToDo
         # Can we do this without if/else, just always run join_prepare/beautiful_fields?
         if self.schema_have_joins():
@@ -50,6 +64,7 @@ class ListView(RetrieveView):
                 where=where,
                 order=order,
                 limit=limit,
+                offset=offset,
                 params=params,
                 many=True,
             )
@@ -87,6 +102,7 @@ class ListView(RetrieveView):
             fields=self.fields,
             where=self.where,
             limit=self.limit,
+            offset=self.offset,
             order=self.order,
             params=self.params,
         )

@@ -125,9 +125,11 @@ class Manager:
 
         return self
 
-    async def select(self, fields='*', join='', where='', order='', limit='', params=None):
-        data = await self.sql.select(fields=fields, join=join, where=where, order=order, limit=limit,
-                                     params=params, many=self.is_list)
+    async def select(self, fields='*', join='', where='', order='', limit='', offset=None, params=None):
+        data = await self.sql.select(
+            fields=fields, join=join, where=where, order=order, limit=limit, offset=offset,
+            params=params, many=self.is_list
+        )
         self.set_data(data)
         # ToDo
         # Create function get_data

@@ -77,7 +77,7 @@ class SQL(object):
 
         return result
 
-    async def select(self, fields='*', join='', where='', order='', limit='', params=None, many=False):
+    async def select(self, fields='*', join='', where='', order='', limit='', offset=None, params=None, many=False):
         params = params or {}
 
         if self.table is None:
@@ -104,6 +104,9 @@ class SQL(object):
 
         if limit:
             self.query += ' limit {}'.format(limit)
+
+        if offset is not None:
+            self.query += f' offset {offset}'
 
         await self.get_connection()
 
