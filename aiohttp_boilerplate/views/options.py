@@ -218,7 +218,7 @@ class SchemaOptionsView(OptionsView):
             d = k.split('__')
             if len(d) == 1:
               temp[k] = v
-            if aliases[d[0]] == '':
+            elif aliases[d[0]] == '':
                 temp[d[1]] = v
             else:
                 temp[aliases[d[0]]][d[1]] = v
