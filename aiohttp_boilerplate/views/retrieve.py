@@ -22,16 +22,16 @@ class RetrieveView(ObjectView):
 
     # Perform database select request
     async def perform_get(self, fields="*", where="", params=None):
-        if self.schema_have_joins():
-            aliases, fields = self.join_prepare_fields(fields)
-            raw_data = await self.obj.sql.select(
-                fields=fields,
-                where=where,
-                params=params,
-            )
-            self.obj.set_data(self.join_beautiful_output(aliases, raw_data))
-        else:
-            await self.obj.select(fields=fields, where=where, params=params)
+        aliases, fields = self.join_prepare_fields(fields)
+        # id is required for single object
+        if fields.rfind("t0.id") == -1:
+          fields += ",t0.id as t0__id"
+        raw_data = await self.obj.sql.select(
+            fields=fields,
+            where=where,
+            params=params,
+        )
+        self.obj.set_data(self.join_beautiful_output(aliases, raw_data))
 
     # Get request running on start, before get, perfom get and after get functions
     async def _get(self):

@@ -174,7 +174,7 @@ class SchemaOptionsView(OptionsView):
         if hasattr(self, 'objects'):
             sql = self.objects.sql
 
-        sql.table = self.obj.__table__ + """ as t0 """
+        sql.table = self.obj.table
         if self.schema:
             schema = self.schema()
             for name, field in sorted(schema.fields.items()):
@@ -198,7 +198,10 @@ class SchemaOptionsView(OptionsView):
                     if not field.dump_only:
                         fields += ",t0.%s as t0__%s" % (name, name)
 
-        fields = fields[1:]
+        if fields == "":
+            fields = "*"
+        elif fields[0] == ",": 
+            fields = fields[1:]
         return (alias, fields)
 
     # Make beautiful json output
@@ -213,6 +216,8 @@ class SchemaOptionsView(OptionsView):
                 temp[v] = {}
         for k, v in raw_data.items():
             d = k.split('__')
+            if len(d) == 1:
+              temp[k] = v
             if aliases[d[0]] == '':
                 temp[d[1]] = v
             else:

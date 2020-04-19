@@ -13,7 +13,7 @@ class Manager:
 
         # ToDo
         # Rename to self.get_table()
-        self.table = self.__table__
+        self.table = self.__table__  + """ as t0 """
 
         if is_list:
             self.data = []

@@ -55,28 +55,17 @@ class ListView(RetrieveView):
         return beautiful_data
 
     async def perform_get(self, fields="", where="", order="", limit=50, offset=None, params=None):
-        # ToDo
-        # Can we do this without if/else, just always run join_prepare/beautiful_fields?
-        if self.schema_have_joins():
-            aliases, fields = self.join_prepare_fields(fields)
-            raw_data = await self.objects.sql.select(
-                fields=fields,
-                where=where,
-                order=order,
-                limit=limit,
-                offset=offset,
-                params=params,
-                many=True,
-            )
-            self.objects.set_data(self.join_beautiful_output(aliases, raw_data))
-        else:
-            await self.objects.select(
-                fields=fields,
-                where=where,
-                order=order,
-                limit=limit,
-                params=params,
-            )
+        aliases, fields = self.join_prepare_fields(fields)
+        raw_data = await self.objects.sql.select(
+            fields=fields,
+            where=where,
+            order=order,
+            limit=limit,
+            offset=offset,
+            params=params,
+            many=True,
+        )
+        self.objects.set_data(self.join_beautiful_output(aliases, raw_data))
 
     async def perform_get_count(self, where, params):
         return await self.objects.sql.get_count(where=where, params=params)
