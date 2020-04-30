@@ -2,9 +2,17 @@ import warnings
 
 from .retrieve import RetrieveView
 
+ALLOW_ORDER = ["asc", "desc"]
+
 
 class ListView(RetrieveView):
-    default_limit = "50"
+    order_fields = []
+    order_default = ''
+    order_map_table = {}
+    order_key = 'order'
+
+    limit_default = 50
+    limit_max_default = 100
 
     def __init__(self, request):
         super().__init__(request)
@@ -33,9 +41,14 @@ class ListView(RetrieveView):
 
     # Return limit for sql query
     def get_limit(self):
-        # TODO
-        # Create consts for default limit amount
-        return self.str_to_int(self.request.query.get('limit', self.default_limit))
+        limit = self.str_to_int(
+            self.request.query.get('limit', self.limit_default)
+        )
+
+        if limit > self.limit_max_default:
+            return self.limit_max_default
+
+        return limit
 
     # Return offset for sql query
     def get_offset(self):
@@ -43,7 +56,22 @@ class ListView(RetrieveView):
 
     # Return order
     def get_order(self):
-        return ''
+        order = self.request.query.get(self.order_key, "")
+        prepared_order = self.order_default
+        if not order:
+            return prepared_order
+
+        field, f_order = order, "desc"
+        if ":" in order:
+            field, f_order = order.split(":")
+
+        if field in self.order_fields and f_order in ALLOW_ORDER:
+            prepared_order = f"{field} {f_order}"
+            table_alias = self.order_map_table.get(field, "t0")
+            if table_alias:
+                prepared_order = table_alias + "." + prepared_order
+
+        return prepared_order
 
     def join_beautiful_output(self, aliases, data):
 
@@ -54,16 +82,10 @@ class ListView(RetrieveView):
 
         return beautiful_data
 
-    async def perform_get(self, fields="", where="", order="", limit=50, offset=None, params=None):
+    async def perform_get(self, fields="", **kwargs):
         aliases, fields = self.join_prepare_fields(fields)
         raw_data = await self.objects.sql.select(
-            fields=fields,
-            where=where,
-            order=order,
-            limit=limit,
-            offset=offset,
-            params=params,
-            many=True,
+            fields=fields, many=True, **kwargs
         )
         self.objects.set_data(self.join_beautiful_output(aliases, raw_data))
 
