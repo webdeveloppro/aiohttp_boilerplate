@@ -20,6 +20,7 @@ config = {
         'max_size': int(os.environ.get('POSTGRES_MAXSIZE', 15)),
         'statement_cache_size': int(os.environ.get('STATEMENT_CACHE_SIZE', 0))
     },
+    'AIOCACHE_DISABLE': os.environ.get('AIOCACHE_DISABLE', False),
     'app_dir': os.environ.get('APP_DIR', 'app'),
     'domain': os.environ.get('DOMAIN', 'example.com'),
     'AUTH_URL': os.environ.get('AUTH_URL', ''),

@@ -163,9 +163,7 @@ class SchemaOptionsView(OptionsView):
 
     # Helper to convert data into beautifull json
     def join_prepare_fields(self, fields="*"):
-
-        if fields == "*":
-            fields = ""
+        _fields = []
 
         t_index = 1
         alias = {'t0': ''}
@@ -174,7 +172,7 @@ class SchemaOptionsView(OptionsView):
         if hasattr(self, 'objects'):
             sql = self.objects.sql
 
-        sql.table = self.obj.__table__ + """ as t0 """
+        sql.table = self.obj.table
         if self.schema:
             schema = self.schema()
             for name, field in sorted(schema.fields.items()):
@@ -190,16 +188,14 @@ class SchemaOptionsView(OptionsView):
                     subs = field.nested()
                     for subf_name, subf in subs.fields.items():
                         if not subf.dump_only:
-                            fields += ",t{}.{} as t{}__{}".format(
-                                t_index, subf_name, t_index, subf_name
-                            )
+                            _fields.append(f"t{t_index}.{subf_name} as t{t_index}__{subf_name}")
                     t_index += 1
                 else:
                     if not field.dump_only:
-                        fields += ",t0.%s as t0__%s" % (name, name)
+                        _fields.append(f"t0.{name} as t0__{name}")
 
-        fields = fields[1:]
-        return (alias, fields)
+        fields = ",".join(_fields) if len(_fields) else fields
+        return alias, fields
 
     # Make beautiful json output
     def join_beautiful_output(self, aliases, raw_data):
@@ -213,7 +209,9 @@ class SchemaOptionsView(OptionsView):
                 temp[v] = {}
         for k, v in raw_data.items():
             d = k.split('__')
-            if aliases[d[0]] == '':
+            if len(d) == 1:
+                temp[k] = v
+            elif aliases[d[0]] == '':
                 temp[d[1]] = v
             else:
                 temp[aliases[d[0]]][d[1]] = v
