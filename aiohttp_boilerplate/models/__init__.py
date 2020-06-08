@@ -34,7 +34,6 @@ class Manager:
         self.sql = storage(table)
 
     def __getattribute__(self, key):
-
         try:
             return super().__getattribute__(key)
         except AttributeError as e:

@@ -165,7 +165,6 @@ class SchemaOptionsView(OptionsView):
     def join_prepare_fields(self, fields="*"):
         _fields = []
 
-        t_index = 1
         alias = {'t0': ''}
 
         sql = self.obj.sql
@@ -173,9 +172,12 @@ class SchemaOptionsView(OptionsView):
             sql = self.objects.sql
 
         sql.table = self.obj.table
-        if self.schema:
-            schema = self.schema()
-            for name, field in sorted(schema.fields.items()):
+
+        def add_fields(_schema, _index="t0", t_index=1):
+            for name, field in sorted(_schema.fields.items()):
+                db_field = field.metadata.get('db_field', ''). \
+                               format(t_index=_index) or f"{_index}.{name}"
+
                 if field.__class__.__name__ == 'JoinNested':
                     sql.table += "{} {} as t{} on {}.{} ".format(
                         field.joinType,
@@ -185,14 +187,14 @@ class SchemaOptionsView(OptionsView):
                         field.joinOn
                     )
                     alias['t{}'.format(t_index)] = name
-                    subs = field.nested()
-                    for subf_name, subf in subs.fields.items():
-                        if not subf.dump_only:
-                            _fields.append(f"t{t_index}.{subf_name} as t{t_index}__{subf_name}")
+                    add_fields(field.nested(), 't%d' % t_index)
                     t_index += 1
                 else:
                     if not field.dump_only:
-                        _fields.append(f"t0.{name} as t0__{name}")
+                        _fields.append(f"{db_field} as {_index}__{name}")
+
+        if self.schema:
+            add_fields(self.schema())
 
         fields = ",".join(_fields) if len(_fields) else fields
         return alias, fields

@@ -1,8 +1,8 @@
 from aiohttp import web
-from aiohttp_boilerplate.config import config
 
-from .options import ObjectView
+from aiohttp_boilerplate.config import config
 from .exceptions import JSONHTTPError
+from .options import ObjectView
 
 
 class UpdateView(ObjectView):

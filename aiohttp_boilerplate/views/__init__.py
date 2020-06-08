@@ -1,10 +1,11 @@
 import datetime
 import decimal
-import sys
 import json
+import sys
 import types
-
 from functools import partial
+
+from .exceptions import JSONHTTPError
 
 
 # JSON serialization tuning
