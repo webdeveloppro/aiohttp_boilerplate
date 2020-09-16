@@ -18,6 +18,9 @@ config = {
         'port': int(os.environ.get('DB_PORT', 5432)),
         'min_size': int(os.environ.get('POSTGRES_MINSIZE', 5)),
         'max_size': int(os.environ.get('POSTGRES_MAXSIZE', 15)),
+        'server_settings': {
+            'application_name': os.environ.get('HOSTNAME', os.environ.get('APPLICATION_NAME', '')),
+        },
         'statement_cache_size': int(os.environ.get('STATEMENT_CACHE_SIZE', 0))
     },
     'AIOCACHE_DISABLE': os.environ.get('AIOCACHE_DISABLE', False),
@@ -28,6 +31,7 @@ config = {
     'middlewares': [
         'aiohttp_boilerplate.middleware.defaults.cross_origin_rules',
         'aiohttp_boilerplate.middleware.defaults.url_status_200',
+        'aiohttp_boilerplate.middleware.defaults.erase_header_server',
     ]
 }
 
