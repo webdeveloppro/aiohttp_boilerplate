@@ -33,10 +33,9 @@ class SQL(object):
         if self.conn is None:
             try:
                 self.conn = await dbpool.DB_POOL.acquire()
-            except Exception:
-                loop = asyncio.get_event_loop()
-                db.DB_POOL = await db.create_pool(config['postgres'], loop=loop)
-                self.conn = await db.DB_POOL.acquire()
+            except Exception as e:
+                print("lost connection")
+                raise e
         return self.conn
 
     def prepare_where(self, where: str, params: dict, index: int = 0) -> str:
