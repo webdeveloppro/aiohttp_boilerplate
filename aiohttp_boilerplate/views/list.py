@@ -29,7 +29,7 @@ class ListView(RetrieveView):
 
     # Return objects list
     def get_objects(self):
-        return self.get_model()(is_list=True)
+        return self.get_model()(is_list=True, db_pool=self.request.app.db_pool)
 
     @staticmethod
     def str_to_int(value: str):

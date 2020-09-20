@@ -36,17 +36,10 @@ async def create_connection(conf, loop=None):
         loop=loop
     )
 
-
 async def create_pool(conf, loop=None):
 
-    # ToDo
-    # Do we need if here?
-    # if DB_POOL is None?
-    from aiohttp_boilerplate import dbpool
-    dbpool.DB_POOL = await asyncpg.create_pool(
+    return await asyncpg.create_pool(
         **conf,
         loop=loop,
         setup=setup_connection
     )
-
-    return dbpool.DB_POOL
