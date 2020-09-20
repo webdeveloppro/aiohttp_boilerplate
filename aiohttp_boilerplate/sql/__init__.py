@@ -14,12 +14,13 @@ class SQLException(Exception):
 
 class SQL(object):
 
-    def __init__(self, table, conn=None, logger=sql_logger):
-        self.conn = conn
+    def __init__(self, table, db_pool=None, logger=sql_logger):
+        self.db_pool = db_pool
         self.table = table
         self.query = ''
         self.params = {}
         self.logger = logger
+        self.conn = None
 
     def __str__(self) -> str:
         return "{} {} {} {}".format(
@@ -32,9 +33,9 @@ class SQL(object):
     async def get_connection(self):
         if self.conn is None:
             try:
-                self.conn = await dbpool.DB_POOL.acquire()
+                self.conn = await self.db_pool.acquire()
             except Exception as e:
-                print("lost connection")
+                self.logger.error(f'db pool lost connection')
                 raise e
         return self.conn
 
@@ -51,7 +52,7 @@ class SQL(object):
     async def release(self):
 
         if self.conn:
-            await dbpool.DB_POOL.release(self.conn)
+            await self.db_pool.release(self.conn)
             self.conn = None
 
     async def execute(self, query, params, fetch_method=consts.EXECUTE):
