@@ -7,7 +7,6 @@ import jwt
 from aiohttp_boilerplate.config import config
 from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 
-
 async def validate_token(token: str) -> Mapping:
     _token = token
     if len(token.split(' ')) == 2:
