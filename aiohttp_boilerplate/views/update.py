@@ -81,7 +81,7 @@ class UpdateView(ObjectView):
                 import sys
                 print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
                 print("Error: ", e, file=sys.stderr)
-            raise JSONHTTPError({'error': e})
+            raise JSONHTTPError({'error': str(e)})
 
         self.data.update(await self.before_update(data))
         try:

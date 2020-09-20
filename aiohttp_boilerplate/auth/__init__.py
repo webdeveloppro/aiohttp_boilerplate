@@ -7,8 +7,6 @@ import jwt
 from aiohttp_boilerplate.config import config
 from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 
-CLAIM_FIELDS = ['user_id', 'email', 'is_superuser', 'is_staff']
-
 
 async def validate_token(token: str) -> Mapping:
     _token = token
@@ -32,9 +30,7 @@ async def validate_token(token: str) -> Mapping:
 
             claims = {}
             for k, v in encode_token(_token).items():
-                for f in CLAIM_FIELDS:
-                    if k.endswith(f):
-                        claims[f] = v
+                claims[k] = v
 
             return claims
 

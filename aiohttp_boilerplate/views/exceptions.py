@@ -20,7 +20,6 @@ def JSONHTTPError(message, errorClass=None, headers=None):
 
     if errorClass is None:
         errorClass = web.HTTPBadRequest
-
+    
     view_logger.warning(f"{errorClass} Msg: {message}")
-
     return errorClass(text=message, headers=headers)
