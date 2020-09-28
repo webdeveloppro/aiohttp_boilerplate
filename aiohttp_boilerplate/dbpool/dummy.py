@@ -1,4 +1,4 @@
-from aiohttp_boilerplate import dbpool
+from aiohttp_boilerplate.sql import SQL
 
 
 class Transaction:
@@ -61,6 +61,7 @@ class DBPool(object):
         pass
 
 
-async def create_pool(conf, loop=None):
-    dbpool.DB_POOL = DBPool()
-    return dbpool.DB_POOL
+async def create_pool(conf, loop=None, storage=SQL):
+    db_pool = DBPool()
+    storage.init(db_pool)
+    return db_pool

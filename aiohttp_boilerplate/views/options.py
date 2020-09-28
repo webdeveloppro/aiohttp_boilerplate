@@ -232,7 +232,7 @@ class ObjectView(SchemaOptionsView):
         super().__init__(request)
 
         self.id = None
-        self.obj = self.get_model()(db_pool=request.app.db_pool)
+        self.obj = self.get_model()()
 
     # Return model object
     def get_model(self):

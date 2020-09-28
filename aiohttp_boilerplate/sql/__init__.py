@@ -1,9 +1,6 @@
-import asyncio
 import re
 
-from aiohttp_boilerplate import dbpool
 from aiohttp_boilerplate.config import config
-from aiohttp_boilerplate.dbpool import pg as db
 from aiohttp_boilerplate.log import sql_logger
 from aiohttp_boilerplate.sql import consts
 
@@ -13,9 +10,15 @@ class SQLException(Exception):
 
 
 class SQL(object):
+    db_pool = None
+    _inited = False
 
-    def __init__(self, table, db_pool=None, logger=sql_logger):
-        self.db_pool = db_pool
+    @classmethod
+    def init(cls, db_pool):
+        cls._inited = True
+        cls.db_pool = db_pool
+
+    def __init__(self, table, logger=sql_logger):
         self.table = table
         self.query = ''
         self.params = {}
@@ -31,6 +34,9 @@ class SQL(object):
         )
 
     async def get_connection(self):
+        if not self._inited:
+            raise Exception("db pool isn't initiate ")
+
         if self.conn is None:
             try:
                 self.conn = await self.db_pool.acquire()
