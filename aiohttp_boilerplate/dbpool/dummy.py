@@ -62,5 +62,4 @@ class DBPool(object):
 
 
 async def create_pool(conf, loop=None):
-    dbpool.DB_POOL = DBPool()
-    return dbpool.DB_POOL
+    return DBPool()

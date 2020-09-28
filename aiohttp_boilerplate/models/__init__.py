@@ -81,9 +81,7 @@ class Manager:
         else:
             self.data.update(data)
 
-    @classmethod
-    async def get_by_id(cls, id, fields="*"):
-        self = cls()
+    async def get_by_id(self, id, fields="*"):
 
         if fields != '*' and 'id' not in fields.split(','):
             fields = 'id,{}'.format(fields)
@@ -95,8 +93,7 @@ class Manager:
 
         return self
 
-    @classmethod
-    async def get_by(cls, fields="*", **filters):
+    async def get_by(self, fields="*", **filters):
         """
             SELECT with AND statement
         Example:
@@ -111,7 +108,6 @@ class Manager:
         if fields != '*' and 'id' not in fields.split(','):
             fields = 'id,{}'.format(fields)
 
-        self = cls()
         where = ' AND '.join(['{key}={{{key}}}'.format(key=f) for f in filters.keys()])
 
         await self.select(
@@ -194,9 +190,7 @@ class Manager:
 
         return await self.sql.get_count(where=where, params=params)
 
-    @classmethod
-    async def is_exists(cls, where='', params=None, **kwargs):
-        self = cls()
+    async def is_exists(self, where='', params=None, **kwargs):
         params = params or {}
         params.update(kwargs)
         new_params = params.copy()
