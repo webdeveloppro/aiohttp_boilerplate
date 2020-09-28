@@ -8,8 +8,9 @@ class ModelException(Exception):
 
 class Manager:
 
-    def __init__(self, is_list=False, storage=None):
+    def __init__(self, db_pool, is_list=False, storage=None):
         self.is_list = is_list
+        self.db_pool = db_pool
 
         # ToDo
         # Rename to self.get_table()
@@ -22,16 +23,16 @@ class Manager:
                 'id': None
             }
 
-        self.set_storage(self.table, storage)
+        self.set_storage(self.table, storage, self.db_pool)
 
-    def set_storage(self, table, storage):
+    def set_storage(self, table, storage, db_pool):
         '''
         Will set a storage for model
         Can me postgresql/reddis/anything else
         '''
         if storage is None:
             storage = SQL
-        self.sql = storage(table)
+        self.sql = storage(table, db_pool)
 
     def __getattribute__(self, key):
         try:
@@ -48,7 +49,7 @@ class Manager:
 
     def __setattr__(self, key, value):
 
-        if key in ['table', 'sql', 'is_list', 'data']:
+        if key in ['table', 'sql', 'is_list', 'data', 'db_pool']:
             return super().__setattr__(key, value)
 
         if hasattr(self, 'is_list') and self.is_list is True:
@@ -74,15 +75,13 @@ class Manager:
         if self.is_list:
             for record in data:
                 # new_obj = {}  # not sure  self.__class__()
-                new_obj = self.__class__()
+                new_obj = self.__class__(db_pool=self.db_pool)
                 new_obj.set_data(dict(record))
                 self.data.append(new_obj)
         else:
             self.data.update(data)
 
-    @classmethod
-    async def get_by_id(cls, id, fields="*"):
-        self = cls()
+    async def get_by_id(self, id, fields="*"):
 
         if fields != '*' and 'id' not in fields.split(','):
             fields = 'id,{}'.format(fields)
@@ -94,8 +93,7 @@ class Manager:
 
         return self
 
-    @classmethod
-    async def get_by(cls, fields="*", **filters):
+    async def get_by(self, fields="*", **filters):
         """
             SELECT with AND statement
         Example:
@@ -110,7 +108,6 @@ class Manager:
         if fields != '*' and 'id' not in fields.split(','):
             fields = 'id,{}'.format(fields)
 
-        self = cls()
         where = ' AND '.join(['{key}={{{key}}}'.format(key=f) for f in filters.keys()])
 
         await self.select(
@@ -193,9 +190,7 @@ class Manager:
 
         return await self.sql.get_count(where=where, params=params)
 
-    @classmethod
-    async def is_exists(cls, where='', params=None, **kwargs):
-        self = cls()
+    async def is_exists(self, where='', params=None, **kwargs):
         params = params or {}
         params.update(kwargs)
         new_params = params.copy()

@@ -4,8 +4,6 @@ from aiohttp import web, hdrs
 
 
 async def on_cleanup(app):
-    # await app.db_pool.release(app.db)
-    # await app.db_pool.terminate()
     await app.db_pool.close()
 
 
