@@ -15,7 +15,7 @@ async def validate_token(token: str) -> Mapping:
     if len(token.split(' ')) == 2:
         _, _, _token = token.partition(' ')
 
-    if token is None or len(token) < 100:
+    if not token or len(token) < 100:
         raise JSONHTTPError(
             {"__error__": "Authentication"},
             aiohttp.web.HTTPUnauthorized,
@@ -49,9 +49,6 @@ class Auth:
 
     async def auth_user(self, is_superadmin=False):
         token = self.request.headers.get('Authorization', '')
-        if not token:
-            return
-
         self.user = await validate_token(token)
 
         if is_superadmin:
