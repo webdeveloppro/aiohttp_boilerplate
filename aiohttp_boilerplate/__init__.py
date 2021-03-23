@@ -1,1 +1,5 @@
-__version__ = '0.2.2'
+__version__ = '0.2.3'
+
+from .logging.formatter import JsonFormatter as JF
+
+JsonFormatter = JF

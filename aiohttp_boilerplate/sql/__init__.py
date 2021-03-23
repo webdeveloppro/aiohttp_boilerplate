@@ -1,10 +1,7 @@
-import asyncio
 import re
 
-from aiohttp_boilerplate import dbpool
 from aiohttp_boilerplate.config import config
-from aiohttp_boilerplate.dbpool import pg as db
-from aiohttp_boilerplate.log import sql_logger
+from aiohttp_boilerplate.logging import sql_logger
 from aiohttp_boilerplate.sql import consts
 
 

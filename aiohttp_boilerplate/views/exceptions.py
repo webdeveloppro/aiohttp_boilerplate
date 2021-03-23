@@ -1,7 +1,7 @@
 import json
 from aiohttp import web
 
-from aiohttp_boilerplate.log import view_logger
+from aiohttp_boilerplate.logging import view_logger
 
 
 # Sugar for transfer json message to string

@@ -1,5 +1,6 @@
 import pathlib
 import re
+
 from setuptools import setup, find_packages
 
 name = 'aiohttp-boilerplate'
@@ -32,4 +33,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    package_data={
+        'logging': ['config.yaml'],
+    }
 )

@@ -1,7 +1,7 @@
 import importlib
 import os.path
 
-from aiohttp_boilerplate.log.helpers import AccessLogger
+from aiohttp_boilerplate.logging.helpers import AccessLogger
 
 # Create as a class
 config = {

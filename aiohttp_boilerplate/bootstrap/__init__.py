@@ -16,11 +16,7 @@ __all__ = ('web_app', 'console_app', 'get_loop',)
 
 
 def get_loop():
-    # TODO
-    # Test logging
-    logging.basicConfig(
-        level=logging.DEBUG if config.config.get('DEBUG') else logging.INFO
-    )
+
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     loop = asyncio.get_event_loop()
     return loop
