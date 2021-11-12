@@ -1,13 +1,13 @@
-import ujson
 from typing import Mapping
 
 import aiohttp
 import jwt
+import ujson
 
 from aiohttp_boilerplate.config import config
 from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 
-CLAIM_FIELDS = ['user_id', 'email', 'is_superuser', 'is_staff']
+CLAIM_FIELDS = ['user_id', 'email', 'is_superuser', 'is_staff', 'email_verified']
 
 
 async def validate_token(token: str) -> Mapping:
