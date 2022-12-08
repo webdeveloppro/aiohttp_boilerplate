@@ -1,9 +1,11 @@
 import re
+import traceback
 
 from aiohttp_boilerplate.config import config
-from aiohttp_boilerplate.logging import sql_logger
+from aiohttp_boilerplate.sql.exceptions import log
 from aiohttp_boilerplate.sql import consts
 
+CUSTOM_TRACE = 5
 
 class SQLException(Exception):
     pass
@@ -11,12 +13,11 @@ class SQLException(Exception):
 
 class SQL(object):
 
-    def __init__(self, table, db_pool=None, logger=sql_logger):
+    def __init__(self, table, db_pool=None):
         self.db_pool = db_pool
         self.table = table
         self.query = ''
         self.params = {}
-        self.logger = logger
         self.conn = None
 
     def __str__(self) -> str:
@@ -32,7 +33,7 @@ class SQL(object):
             try:
                 self.conn = await self.db_pool.acquire()
             except Exception as e:
-                self.logger.error(f'db pool lost connection')
+                log.error(f'db pool lost connection')
                 raise e
         return self.conn
 
@@ -58,7 +59,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug(f'query: %s, values: %s', self.query, self.params.values())
 
         try:
             if fetch_method == consts.EXECUTE:
@@ -107,11 +108,10 @@ class SQL(object):
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
-        if config.get('TRACEBACK', 0) > 0:
-            import traceback
-            self.logger.warning('\n'.join([str(line) for line in traceback.extract_stack()]))
+        if log.level == CUSTOM_TRACE:
+            log.warning('\n'.join([str(line) for line in traceback.extract_stack()]))
 
         try:
             stmt = await self.conn.prepare(self.query)
@@ -136,7 +136,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, data.values())
+        log.debug('query: %s, values: %s', self.query, data.values())
 
         try:
             result = await self.conn.fetchval(self.query, *data.values())
@@ -160,7 +160,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.execute(self.query, *self.params.values())
@@ -180,7 +180,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.execute(self.query, *params.values())
@@ -200,7 +200,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.fetchval(self.query, *params.values())
@@ -221,7 +221,7 @@ class SQL(object):
         self.query = query
         self.params = params
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.fetchval(self.query, *self.params.values())

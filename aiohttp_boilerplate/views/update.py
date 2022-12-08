@@ -1,7 +1,8 @@
+import logging
 from aiohttp import web
 
-from aiohttp_boilerplate.config import config
-from .exceptions import JSONHTTPError
+from .options import ObjectView
+from .exceptions import JSONHTTPError, log
 from .options import ObjectView
 
 
@@ -68,45 +69,19 @@ class UpdateView(ObjectView):
         else:
             data = await self.get_request_data(to_json=True)
 
+        data = await self.validate(data)
         if len(data) == 0:
-            raise JSONHTTPError({'error': 'No content'})
-
-        try:
-            data = await self.validate(data)
-        except Exception as e:
-            # ToDo
-            # Add logger
-            if config['DEBUG'] > 0:
-                import traceback
-                import sys
-                print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
-                print("Error: ", e, file=sys.stderr)
-            raise JSONHTTPError({'error': e})
+            raise JSONHTTPError({'error': 'No content'}, web.HTTPBadRequest)
 
         self.data.update(await self.before_update(data))
-        try:
-            updated = await self.perform_update(
-                where=self.where,
-                params=self.params,
-                data=self.data,
-            )
-            if updated == 0:
-                raise JSONHTTPError({'error': 'No object updated'})
+        updated = await self.perform_update(
+            where=self.where,
+            params=self.params,
+            data=self.data,
+        )
 
-        except Exception as e:
-            # ToDo
-            # Add logger
-            if config['DEBUG'] > 0:
-                import traceback
-                import sys
-                traceback.print_exc(file=sys.stderr)
-                # print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
-                print("Error: ", e, file=sys.stderr)
-
-            raise JSONHTTPError(
-                {'error': str(e)},
-                web.HTTPInternalServerError
-            )
+        if updated == 0:
+            raise JSONHTTPError({'error': 'No object updated'}, web.HTTPNotFound)
 
         await self.after_update(self.data)
         response = await self.get_data(self.obj.data)
@@ -117,7 +92,25 @@ class UpdateView(ObjectView):
         return await self.patch()
 
     async def patch(self):
-        return await self._patch()
+        try:
+            return await self._patch()
+        except Exception as err:
+            # show any 4xx errors directly
+            if hasattr(err, 'status_code'):
+                if err.status_code >= 400 and err.status_code < 500:
+                    raise err
+
+            log.error(err)
+            err_msg = 'HTTP Internal Server Error'
+            
+            if log.level == logging.DEBUG:
+                err_msg = str(err)
+            
+            raise JSONHTTPError(
+                {'error': err_msg}, web.HTTPInternalServerError
+            ) from err
 
     async def put(self):
+        log.warning("test message")
+        log.error("test error message")
         return await self._put()

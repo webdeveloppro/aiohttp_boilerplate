@@ -1,26 +1,27 @@
 import json
 from aiohttp import web
 
-from aiohttp_boilerplate.logging import view_logger
+from aiohttp_boilerplate.logging import get_logger
+
+log = get_logger('aiohttp_boilerplate.views')
 
 
-# Sugar for transfer json message to string
-def JSONHTTPError(message, errorClass=None, headers=None):
+def JSONHTTPError(message, error_class=None, headers=None):
+    """ Helper to parse json and return string """
     message = json.dumps(message)
     headers = headers or {}
     headers['Content-Type'] = 'application/json'
 
     # ToDo
-    # Run middlewares
+    # move to middleware
     headers['Access-Control-Allow-Origin'] = '*'
     headers['Access-Control-Allow-Methods'] = \
         'GET, POST, PUT, OPTIONS, DELETE, PATCH'
     headers['Access-Control-Allow-Headers'] = \
         'Authorization, X-PINGOTHER, Content-Type, X-Requested-With'
 
-    if errorClass is None:
-        errorClass = web.HTTPBadRequest
+    if error_class is None:
+        error_class = web.HTTPBadRequest
 
-    view_logger.warning(f"{errorClass} Msg: {message}")
-
-    return errorClass(text=message, headers=headers)
+    log.warning('%s: %s', error_class, message)
+    return error_class(text=message, headers=headers)

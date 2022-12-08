@@ -1,9 +1,8 @@
+from aiohttp import web
+
 from aiohttp_boilerplate.views import fixed_dump
+from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 from aiohttp_boilerplate.sql import SQL
-
-
-class ModelException(Exception):
-    pass
 
 
 class Manager:
@@ -37,7 +36,7 @@ class Manager:
     def __getattribute__(self, key):
         try:
             return super().__getattribute__(key)
-        except AttributeError as e:
+        except AttributeError as err:
             if key != 'data':
                 if hasattr(self, 'data') is True:
                     if key in self.data:
@@ -45,7 +44,7 @@ class Manager:
                     else:
                         return None
 
-            raise AttributeError(str(e))
+            raise AttributeError(str(err)) from err
 
     def __setattr__(self, key, value):
 
@@ -89,7 +88,10 @@ class Manager:
         await self.select(fields=fields, where='id={id}', params={'id': id})
 
         if self.id is None:
-            raise ModelException("Object not found get_by_id")
+            raise JSONHTTPError(
+                {'error': f'Object {self.__class__.__name__} not found by get_by_id'},
+                web.HTTPNotFound,
+            )
 
         return self
 
@@ -106,7 +108,7 @@ class Manager:
         """
 
         if fields != '*' and 'id' not in fields.split(','):
-            fields = 'id,{}'.format(fields)
+            fields = f'id,{fields}'
 
         where = ' AND '.join(['{key}={{{key}}}'.format(key=f) for f in filters.keys()])
 
@@ -117,7 +119,10 @@ class Manager:
         )
 
         if self.id is None:
-            raise ModelException("Object not found get_by")
+            raise JSONHTTPError(
+                {'error': f'Object {self.__class__.__name__} not found by get_by'},
+                web.HTTPNotFound,
+            )
 
         return self
 
@@ -141,7 +146,9 @@ class Manager:
         if load == 1:
             await self.select(where='id={id}', params={'id': self.id})
 
-        return self.id
+        data['id'] = self.id
+        self.set_data(data)
+        return self
 
     async def update(self, where='', params=None, data=None, **kwargs):
         """

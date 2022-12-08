@@ -1,7 +1,8 @@
+import logging
 from aiohttp import web
 
 from .options import ObjectView
-from .exceptions import JSONHTTPError
+from .exceptions import JSONHTTPError, log
 
 
 class CreateView(ObjectView):
@@ -66,28 +67,15 @@ class CreateView(ObjectView):
         else:
             data = await self.get_request_data(to_json=True)
 
-        if len(data) == 0:
-            raise JSONHTTPError({'error': 'No content'})
+        data = await self.validate(data)
 
-        try:
-            data = await self.validate(data)
-        except Exception as e:
-            # ToDo
-            # Add logger
-            raise JSONHTTPError({'error': str(e)})
+        if len(data) == 0:
+            raise JSONHTTPError({'error': 'No content'}, web.HTTPBadRequest)
 
         self.data.update(await self.before_create(data))
-        try:
-            self.obj.data['id'] = await self.perform_create(
-                data=self.data,
-            )
-        except Exception as e:
-            # ToDo
-            # Add logger
-            raise JSONHTTPError(
-                {'error': str(e)},
-                web.HTTPInternalServerError
-            )
+        self.obj = await self.perform_create(
+            data=self.data,
+        )
 
         await self.after_create(data)
         response = await self.get_data(self.obj)
@@ -97,4 +85,20 @@ class CreateView(ObjectView):
         ''' Post logic is in _post method
             You can do here authentication check before if you need
         '''
-        return await self._post()
+        try:
+            return await self._post()
+        except Exception as err:
+            # show any 4xx errors directly
+            if hasattr(err, 'status_code'):
+                if err.status_code >= 400 and err.status_code < 500:
+                    raise err
+
+            log.error(err)
+            err_msg = 'HTTP Internal Server Error'
+            
+            if log.level == logging.DEBUG:
+                err_msg = str(err)
+            
+            raise JSONHTTPError(
+                {'error': err_msg}, web.HTTPInternalServerError
+            ) from err

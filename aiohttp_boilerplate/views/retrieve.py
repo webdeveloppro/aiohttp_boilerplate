@@ -1,7 +1,8 @@
+import logging
 from aiohttp import web
 
 from .options import ObjectView
-from .exceptions import JSONHTTPError
+from .exceptions import JSONHTTPError, log
 
 
 class RetrieveView(ObjectView):
@@ -50,4 +51,20 @@ class RetrieveView(ObjectView):
         return await self.get_data(self.obj)
 
     async def get(self):
-        return self.json_response(await self._get())
+        try:
+            return self.json_response(await self._get())
+        except Exception as err:
+            # show any 4xx errors directly
+            if hasattr(err, 'status_code'):
+                if err.status_code >= 400 and err.status_code < 500:
+                    raise err
+
+            log.error(err)
+            err_msg = 'HTTP Internal Server Error'
+            
+            if log.level == logging.DEBUG:
+                err_msg = str(err)
+            
+            raise JSONHTTPError(
+                {'error': err_msg}, web.HTTPInternalServerError
+            ) from err
