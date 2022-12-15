@@ -23,5 +23,5 @@ def JSONHTTPError(message, error_class=None, headers=None):
     if error_class is None:
         error_class = web.HTTPBadRequest
 
-    log.warning('%s: %s', error_class, message)
+    # log.warning('%s: %s', error_class, message)
     return error_class(text=message, headers=headers)

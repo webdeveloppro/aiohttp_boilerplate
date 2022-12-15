@@ -59,7 +59,7 @@ class RetrieveView(ObjectView):
                 if err.status_code >= 400 and err.status_code < 500:
                     raise err
 
-            log.error(err)
+            log.error(err, exc_info=True)
             err_msg = 'HTTP Internal Server Error'
             
             if log.level == logging.DEBUG:

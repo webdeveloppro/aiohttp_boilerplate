@@ -1,14 +1,11 @@
 import importlib
 import os.path
 
-from aiohttp_boilerplate.logging.helpers import AccessLogger
-
 # Create as a class
 config = {
     'web_run': {
         'host': os.environ.get('HOST', 'localhost'),
         'port': int(os.environ.get('PORT', 8080)),
-        'access_log_class': AccessLogger,
     },
     'postgres': {
         'database': os.environ.get('DB_DATABASE', 'test'),
