@@ -15,6 +15,7 @@ async def cross_origin_rules(request, handler):
             allow = request.headers.get('origin', '')
 
     response = await handler(request)
+    response.headers['Access-Control-Allow-Credentials'] = '1'
     response.headers['Access-Control-Allow-Origin'] = allow
     response.headers['Access-Control-Allow-Methods'] = \
         'GET, POST, PUT, OPTIONS, DELETE, PATCH'
