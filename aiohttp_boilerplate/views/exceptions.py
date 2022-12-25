@@ -14,6 +14,7 @@ def JSONHTTPError(message, error_class=None, headers=None):
 
     # ToDo
     # move to middleware
+    headers['Access-Control-Allow-Credentials'] = 'true'
     headers['Access-Control-Allow-Origin'] = '*'
     headers['Access-Control-Allow-Methods'] = \
         'GET, POST, PUT, OPTIONS, DELETE, PATCH'

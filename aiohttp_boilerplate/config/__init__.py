@@ -15,11 +15,9 @@ config = {
         'port': int(os.environ.get('DB_PORT', 5432)),
         'min_size': int(os.environ.get('POSTGRES_MINSIZE', 5)),
         'max_size': int(os.environ.get('POSTGRES_MAXSIZE', 15)),
-        'server_settings': {
-            'application_name': os.environ.get('HOSTNAME', os.environ.get('APPLICATION_NAME', '')),
-        },
         'statement_cache_size': int(os.environ.get('STATEMENT_CACHE_SIZE', 0))
     },
+    'hostname': os.environ.get('HOSTNAME', ''),
     'AIOCACHE_DISABLE': os.environ.get('AIOCACHE_DISABLE', False),
     'app_dir': os.environ.get('APP_DIR', 'app'),
     'domain': os.environ.get('DOMAIN', 'example.com'),
@@ -41,5 +39,5 @@ except ModuleNotFoundError:
 
 
 # Incase if you will have to load your config from file or database
-async def load_config(loop=None):
+async def load_config(loop):
     return config

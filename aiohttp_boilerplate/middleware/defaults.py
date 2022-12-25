@@ -4,15 +4,13 @@ from aiohttp import web, hdrs
 # Restrict access for conf['domain'] domain and subdomains only
 @web.middleware
 async def cross_origin_rules(request, handler):
-    allow = "*"
 
-    if not request.app.conf.get('DEBUG') >= 1:
-        # Allow requests from subdomains
-        domain = request.app.conf.get('domain', '')
-        if request.headers.get('origin', '').count(domain) == 0:
-            allow = request.headers.get('scheme', 'http') + "://" + domain
-        else:
-            allow = request.headers.get('origin', '')
+    # Allow requests from subdomains
+    domain = request.app.conf.get('domain', '')
+    if request.headers.get('origin', '').count(domain) == 0:
+        allow = request.headers.get('scheme', 'http') + "://" + domain
+    else:
+        allow = request.headers.get('origin', '')
 
     response = await handler(request)
     response.headers['Access-Control-Allow-Credentials'] = 'true'

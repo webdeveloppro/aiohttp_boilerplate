@@ -6,13 +6,13 @@ authors = ["Vladyslav Tarasenko <vladka@webdevelop.pro>", "Artem Tiumentcev <art
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.7"
-aiohttp = "3.6.2"
-asyncpg = "0.20.1"
-marshmallow = "2.19.5"
-ujson = "1.35"
-uvloop = "0.14.0"
-PyJWT = "1.7.1"
+python = ">=3.8"
+aiohttp = "3.8.3"
+asyncpg = "0.24.0"
+marshmallow = "2.21.0"
+uvloo = "0.16.0"
+ujson = "5.4.0"
+PyJWT = "2.4.0"
 aiocache = "0.11.1"
 python-json-logger = "2.0.1"
 

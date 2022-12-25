@@ -6,3 +6,5 @@ pyre-check
 pytest
 pytest-aiohttp
 python-dateutil
+ruff
+

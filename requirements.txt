@@ -1,4 +1,4 @@
-aiohttp==3.7.2
+aiohttp==3.8.3
 asyncpg==0.24.0
 marshmallow==2.21.0
 PyJWT==2.4.0

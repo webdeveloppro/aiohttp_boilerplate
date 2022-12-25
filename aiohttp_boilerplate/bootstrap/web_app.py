@@ -5,6 +5,7 @@ from aiohttp import web, hdrs
 
 async def on_cleanup(app):
     await app.db_pool.close()
+    await app.loop.close()
 
 
 async def on_prepare(request, response):
@@ -22,7 +23,7 @@ def start_web_app(conf, db_pool, loop=None):
             middlewares.append(met)
 
     # setup application and extensions
-    app = web.Application(middlewares=middlewares)
+    app = web.Application(middlewares=middlewares, loop=loop)
     app.conf = conf
     app.db_pool = db_pool
 

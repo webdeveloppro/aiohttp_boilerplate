@@ -126,7 +126,9 @@ class Manager:
 
         return self
 
-    async def select(self, fields='*', join='', where='', order='', limit='', offset=None, params=None):
+    async def select(
+        self, fields='*', join='', where='', order='', limit='', offset=None, params=None
+    ):
         data = await self.sql.select(
             fields=fields, join=join, where=where, order=order, limit=limit, offset=offset,
             params=params, many=self.is_list
@@ -253,7 +255,8 @@ class JsonbManager(Manager):
         data = fixed_dump(data)
 
         # FIXME
-        query = "update {table} set {key}=jsonb_set({key}, '{{{index}}}', '{data}'::jsonb) ".format(  # nosec
+        query = "UPDATE \
+            {table} set {key}=jsonb_set({key}, '{{{index}}}', '{data}'::jsonb) ".format(  # nosec
             table=self.table,
             key=self.__key_name__,
             data=data.replace("'", ""),

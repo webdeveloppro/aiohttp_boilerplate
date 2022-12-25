@@ -1,7 +1,6 @@
 import re
 import traceback
 
-from aiohttp_boilerplate.config import config
 from aiohttp_boilerplate.sql.exceptions import log
 from aiohttp_boilerplate.sql import consts
 
@@ -32,9 +31,9 @@ class SQL(object):
         if self.conn is None:
             try:
                 self.conn = await self.db_pool.acquire()
-            except Exception as e:
-                log.error(f'db pool lost connection')
-                raise e
+            except Exception as exp:
+                log.error('db pool lost connection')
+                raise exp
         return self.conn
 
     def prepare_where(self, where: str, params: dict, index: int = 0) -> str:
@@ -59,7 +58,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             if fetch_method == consts.EXECUTE:
@@ -75,7 +74,9 @@ class SQL(object):
 
         return result
 
-    async def select(self, fields='*', join='', where='', order='', limit='', offset=None, params=None, many=False):
+    async def select(self,
+        fields='*', join='', where='', order='', limit='', offset=None, params=None, many=False
+    ):
         params = params or {}
 
         if self.table is None:
@@ -85,7 +86,6 @@ class SQL(object):
             raise SQLException('params have to be dict')
 
         self.params = params
-        # FIXME
         self.query = 'select {} from {}'.format(fields, self.table)  # nosec
 
         if join:

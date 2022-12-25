@@ -3,7 +3,6 @@ from aiohttp import web
 
 from .options import ObjectView
 from .exceptions import JSONHTTPError, log
-from .options import ObjectView
 
 
 class UpdateView(ObjectView):

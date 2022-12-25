@@ -1,6 +1,3 @@
-from aiohttp_boilerplate import dbpool
-
-
 class Transaction:
     async def __aenter__(self):
         return self
