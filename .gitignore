@@ -11,6 +11,7 @@
 
 # workspace files are user-specific
 *.sublime-workspace
+.vscode
 
 # project files should be checked into the repository, unless a significant
 # proportion of contributors will probably not be using SublimeText
@@ -34,6 +35,7 @@ nosetests.xml
 htmlcov
 
 *.pyc
+.env
 venv/*
 
 # Translations
@@ -72,7 +74,7 @@ node_modules/
 djadmin/media/
 
 # Hitch directory
-aiohttp_boilerplate/tests/.hitch
+tests/.hitch
 
 # MailHog binary
 mailhog
@@ -81,13 +83,13 @@ mailhog
 local.yml
 
 # Local Settings
-aiohttp_boilerplate/config/settings/local.py
+config/settings/local.py
 
 .project
 .pydevproject
 .settings/
 ve/
-aiohttp_boilerplate/config/settings/local.py
+config/settings/local.py
 
 # Temp files
 temp/
@@ -102,7 +104,6 @@ env/*
 env.myvar
 .cache
 .pytest_cache
-.vscode
 
-dist/
-poetry.lock
+aiohttp_boilerplate
+.env.local
