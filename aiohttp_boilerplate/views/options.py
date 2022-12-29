@@ -75,21 +75,7 @@ class SchemaOptionsView(OptionsView):
 
         try:
             schema_result = schema().loads(data, partial=partial)
-        except Exception as e:
-            '''
-            ToDo
-            Create logging facility
-
-            raise web.HTTPBadRequest(
-                text=json.dumps(_non_field_errors(
-                    traceback.format_exc(3, 100))),
-                headers={
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers':
-                    'Authorization, X-PINGOTHER, Content-Type, X-Requested-With'
-                },
-                content_type='application/json')
-            '''
+        except Exception as exp:
             raise JSONHTTPError({'error': str(e)})
 
         if len(schema_result.errors):

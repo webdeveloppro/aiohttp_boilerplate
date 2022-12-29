@@ -85,6 +85,7 @@ class CreateView(ObjectView):
         ''' Post logic is in _post method
             You can do here authentication check before if you need
         '''
+        log.debug('%s %s', self.request.method, str(self.request.url))
         try:
             return await self._post()
         except Exception as err:

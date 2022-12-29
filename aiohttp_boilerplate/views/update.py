@@ -91,6 +91,7 @@ class UpdateView(ObjectView):
         return await self.patch()
 
     async def patch(self):
+        log.debug('%s %s', self.request.method, str(self.request.url))
         try:
             return await self._patch()
         except Exception as err:
@@ -110,4 +111,5 @@ class UpdateView(ObjectView):
             ) from err
 
     async def put(self):
+        log.debug('%s %s', self.request.method, str(self.request.url))
         return await self._put()

@@ -131,6 +131,7 @@ class ListView(RetrieveView):
         }
 
     async def get(self):
+        log.debug('%s %s', self.request.method, str(self.request.url))
         try:
             return self.json_response(await self._get())
         except Exception as err:
