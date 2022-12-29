@@ -18,7 +18,7 @@ class E2ETestCase(UnitTestCase):
         """Override the get_app method to return your application.
         """
         # it's important to use the loop passed here.
-        conf = await config.load_config()
+        conf = await config.load_config(loop=self.loop)
         db_pool = await db.create_pool(
             conf=conf['postgres'],
             loop=self.loop,

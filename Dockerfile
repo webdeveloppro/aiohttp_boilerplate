@@ -14,6 +14,6 @@ RUN apk add --no-cache build-base \
 RUN mkdir -p /aiohttp_bolierplate.git
 WORKDIR /aiohttp_bolierplate.git
 COPY . /aiohttp_bolierplate.git
-RUN pip install -r --no-cache-dir requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["sh"]

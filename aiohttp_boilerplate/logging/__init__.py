@@ -5,7 +5,12 @@ import sys
 import threading
 from logging import config as log_config
 
-DEFAULT_LOG_LEVEL = os.environ.get("LOG_LEVEL", "info").upper()
+DEFAULT_LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+
+logging.basicConfig()
+logging.root.setLevel(logging.NOTSET)
+
+
 
 def get_logger(name:str, level:str = None):
     """create logger"""

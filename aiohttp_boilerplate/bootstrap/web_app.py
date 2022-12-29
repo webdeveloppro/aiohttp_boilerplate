@@ -5,7 +5,7 @@ from aiohttp import web, hdrs
 
 async def on_cleanup(app):
     await app.db_pool.close()
-    await app.loop.close()
+    # await app.loop.close()
 
 
 async def on_prepare(request, response):
