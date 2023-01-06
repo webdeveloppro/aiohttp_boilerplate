@@ -27,6 +27,9 @@ class RetrieveView(ObjectView):
         # id is required for single object
         if fields.rfind("t0.id") == -1:
             fields += ",t0.id as t0__id"
+        # ToDo
+        # Separate views -> models -> sql
+        # So do self.obj.select() and select invoke sql
         raw_data = await self.obj.sql.select(fields=fields, **kwargs)
         self.obj.set_data(self.join_beautiful_output(aliases, raw_data))
 

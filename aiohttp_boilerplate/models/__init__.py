@@ -142,14 +142,14 @@ class Manager:
         data = data or {}
 
         data.update(kwargs)
+        self.set_data(data)
 
-        self.id = await self.sql.insert(data=data)
+        raw_result = await self.sql.insert(data=data)
+        self.set_data(raw_result)
 
         if load == 1:
             await self.select(where='id={id}', params={'id': self.id})
 
-        data['id'] = self.id
-        self.set_data(data)
         return self
 
     async def update(self, where='', params=None, data=None, **kwargs):

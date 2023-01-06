@@ -124,13 +124,15 @@ class SQL(object):
 
         return result
 
-    async def insert(self, data: dict) -> int:
+    async def insert(self, data: dict) -> dict:
         on_conflict = data.pop('__on_conflict', '')
-        self.query = 'insert into {}({}) values({}) {} RETURNING id'.format(
+        returning = data.pop('__returning', '*')
+        self.query = 'insert into {}({}) values({}) {} RETURNING {}'.format(
             self.table,
             ','.join(data.keys()),
             ','.join(['$%d' % (x + 1) for x in range(0, data.__len__())]),
-            on_conflict
+            on_conflict,
+            returning,
         )
         # self.params = self._prepare_fields(params)
 
@@ -139,7 +141,7 @@ class SQL(object):
         log.debug('query: %s, values: %s', self.query, data.values())
 
         try:
-            result = await self.conn.fetchval(self.query, *data.values())
+            result = await self.conn.fetchrow(self.query, *data.values())
         finally:
             await self.release()
 

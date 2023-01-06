@@ -5,6 +5,7 @@ import sys
 import types
 from functools import partial
 
+from .exceptions import JSONHTTPError
 
 # JSON serialization tuning
 # Fix for datetime, decimal, memoryview and bytes type

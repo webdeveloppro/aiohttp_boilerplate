@@ -76,7 +76,7 @@ class SchemaOptionsView(OptionsView):
         try:
             schema_result = schema().loads(data, partial=partial)
         except Exception as exp:
-            raise JSONHTTPError({'error': str(e)})
+            raise JSONHTTPError({'error': str(exp)})
 
         if len(schema_result.errors):
             raise JSONHTTPError(schema_result.errors)
@@ -218,11 +218,14 @@ class ObjectView(SchemaOptionsView):
         super().__init__(request)
 
         self.id = None
-        self.obj = self.get_model()(db_pool=request.app.db_pool)
+        if self.get_model() is None:
+            warnings.warn('get_model return None', RuntimeWarning)
+        else:
+            self.obj = self.get_model()(db_pool=request.app.db_pool)
 
     # Return model object
     def get_model(self):
-        warnings.warn('Redefine get_schema in inherited class', RuntimeWarning)
+        warnings.warn('Redefine get_model in inherited class', RuntimeWarning)
         return None
 
     # Return object id from request

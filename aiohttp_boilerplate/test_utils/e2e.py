@@ -1,3 +1,5 @@
+import logging
+
 from .unit import UnitTestCase
 from .load_fixtures import LoadFixture
 
@@ -29,12 +31,10 @@ class E2ETestCase(UnitTestCase):
             db_pool=db_pool,
             loop=self.loop,
         )
-
-        app.db_pool = db_pool
-        self.conf = conf
         return app
 
     async def setUpAsync(self):
+        await super().setUpAsync()
         if len(self.fixtures.keys()) > 0:
             con = await self.app.db_pool.acquire()
             for name, path in self.fixtures.items():
@@ -52,7 +52,8 @@ class E2ETestCase(UnitTestCase):
             async with con.transaction():
                 print('Loading {}'.format(path))
                 await fixture.file2db(con)
-        except Exception as e:
-            raise Exception("cannot upload file {}, {}".format(path, str(e)))
+        except Exception as err:
+            logging.error(err, exc_info=True)
+            raise Exception("cannot upload file {}, {}".format(path, str(err)))
 
         return fixture.data

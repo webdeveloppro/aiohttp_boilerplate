@@ -30,9 +30,6 @@ class UnitTestCase(AioHTTPTestCase):
             db_pool=db_pool,
             loop=self.loop,
         )
-
-        app.db_pool = db_pool
-        self.conf = conf
         return app
 
     async def request(self, url, method, data=None, headers=None):

@@ -37,7 +37,7 @@ class UpdateView(ObjectView):
         '''
         return data
 
-    async def after_update(self, data: dict):
+    async def after_update(self, data: dict) -> dict:
         ''' Runs after:
                 - successful validation method
                 - before_create method
@@ -47,7 +47,7 @@ class UpdateView(ObjectView):
 
             new object data is self.obj
         '''
-        pass
+        return data
 
     async def _patch(self):
         ''' Post method handler, will run one by one
@@ -82,8 +82,8 @@ class UpdateView(ObjectView):
         if updated == 0:
             raise JSONHTTPError({'error': 'No object updated'}, web.HTTPNotFound)
 
-        await self.after_update(self.data)
-        response = await self.get_data(self.obj.data)
+        self.data.update(await self.after_update(data))
+        response = await self.get_data(self.obj)
         return self.json_response(response)
 
     async def _put(self):
