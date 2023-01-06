@@ -18,9 +18,7 @@ class Manager:
         if is_list:
             self.data = []
         else:
-            self.data = {
-                'id': None
-            }
+            self.data = {}
 
         self.set_storage(self.table, storage, self.db_pool)
 
@@ -87,6 +85,9 @@ class Manager:
 
         await self.select(fields=fields, where='id={id}', params={'id': id})
 
+        # ToDo
+        # What if we are using this for the list?
+        # we should just return count of objects returned by select
         if self.id is None:
             raise JSONHTTPError(
                 {'error': f'Object {self.__class__.__name__} not found by get_by_id'},
@@ -118,6 +119,9 @@ class Manager:
             params=filters
         )
 
+        # ToDo
+        # What if we are using this for the list?
+        # we should just return count of objects returned by select
         if self.id is None:
             raise JSONHTTPError(
                 {'error': f'Object {self.__class__.__name__} not found by get_by'},
@@ -135,7 +139,7 @@ class Manager:
         )
         self.set_data(data)
         # ToDo
-        # Create function get_data
+        # select should return length of returned objects from db
         return self
 
     async def insert(self, data=None, load=0, **kwargs):
@@ -150,6 +154,8 @@ class Manager:
         if load == 1:
             await self.select(where='id={id}', params={'id': self.id})
 
+        # ToDo
+        # insert should return length amount of effected row
         return self
 
     async def update(self, where='', params=None, data=None, **kwargs):
@@ -192,7 +198,7 @@ class Manager:
         if self.is_list:
             self.data = []
         else:
-            self.id = None
+            self.data = {}
         return deleted
 
     async def get_count(self, where='', params=None):
