@@ -257,6 +257,8 @@ class ObjectView(SchemaOptionsView):
             for f in self.schema().fields:
                 data[f] = getattr(obj, f)
         else:
+            # ToDo
+            # use obj from incoming parameter
             data = self.obj.data
 
         return data

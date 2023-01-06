@@ -54,7 +54,8 @@ class SQL(object):
 
     async def execute(self, query, params, fetch_method=consts.EXECUTE):
         self.query = query
-        self.params = params
+        self.params = {}
+        self.params.update(params)
 
         await self.get_connection()
 
@@ -85,7 +86,8 @@ class SQL(object):
         if type(params) != dict:
             raise SQLException('params have to be dict')
 
-        self.params = params
+        self.params = {}
+        self.params.update(params)
         self.query = 'select {} from {}'.format(fields, self.table)  # nosec
 
         if join:
@@ -156,7 +158,8 @@ class SQL(object):
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params, len(data)))
 
-        self.params = data
+        self.params = {}
+        self.params.update(data)
         self.params.update(params)
         # self.params = self._prepare_fields(self.params)
 
@@ -178,7 +181,8 @@ class SQL(object):
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params))
 
-        self.params = params
+        self.params = {}
+        self.params.update(params)
 
         await self.get_connection()
 
@@ -198,7 +202,8 @@ class SQL(object):
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params))
 
-        self.params = params
+        self.params = {}
+        self.params.update(params)
 
         await self.get_connection()
 
@@ -221,7 +226,8 @@ class SQL(object):
         )
 
         self.query = query
-        self.params = params
+        self.params = {}
+        self.params.update(params)
 
         log.debug('query: %s, values: %s', self.query, self.params.values())
 
