@@ -36,7 +36,8 @@ class OptionsView(web.View):
         return self.request_data
 
     async def _options(self):
-        return self._fields(self.schema()) if hasattr(self, 'schema') else {}
+        return self._fields(self.schema()) if hasattr(self, 'schema') \
+            and self.schema is not None else {}
 
     # Will return options request with fields meta data
     async def options(self):
