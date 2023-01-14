@@ -213,6 +213,10 @@ class Manager:
 
 
 class JsonbManager(Manager):
+    # ToDo
+    # Add validation key_name is not None
+    __key_name__ = None
+    __update_type__ = 'update'
 
     async def select(self, fields='*', where='', order='', limit='', params=None):
 
@@ -230,18 +234,29 @@ class JsonbManager(Manager):
         return self.data
 
     async def insert(self, where, params, data):
+        # ToDo
+        # check where is not empty
+        # ToDo
+        # check __update_type_ is not empty and valid
 
         data = fixed_dump(data)
-        query = "update {table} set {key}=jsonb_set({key}, concat('{{',"
-        query += " jsonb_array_length({key}),'}}')::text[], '{data}'::jsonb) "
+        query = "update {table} set {key}="
+        if self.__update_type__ == 'append':
+            query += "jsonb_set({key}, concat('{{',"
+            query += " jsonb_array_length({key}),'}}')::text[], '{data}'::jsonb) "
+        elif self.__update_type__ == 'update':
+            query += "'{data}'::jsonb"
+
+        query += ' where {where} RETURNING '
+        
+        if self.__update_type__ == 'append':
+            query += 'jsonb_array_length({key}) as r'
+        elif self.__update_type__ == 'update':
+            query += 'id'
         query = query.format(
             table=self.table,
             key=self.__key_name__,
-            data=data.replace("'", ""),
-        )
-
-        query += ' where {where} RETURNING jsonb_array_length({key}) as r'.format(
-            key=self.__key_name__,
+            data=data.replace("'", "\'"),
             where=self.sql.prepare_where(where, params)
         )
 
@@ -258,6 +273,8 @@ class JsonbManager(Manager):
         if 'index' not in params.keys():
             return await self.insert(where, params, data)
 
+        # ToDo
+        # check where is not empty
         data = fixed_dump(data)
 
         # FIXME
