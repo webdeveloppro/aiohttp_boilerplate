@@ -245,7 +245,7 @@ class JsonbManager(Manager):
             query += "jsonb_set({key}, concat('{{',"
             query += " jsonb_array_length({key}),'}}')::text[], '{data}'::jsonb) "
         elif self.__update_type__ == 'update':
-            query += "'{data}'::jsonb"
+            query += "{key} || '{data}'"
 
         query += ' where {where} RETURNING '
         
