@@ -148,6 +148,38 @@ class SchemaOptionsView(OptionsView):
                     return True
         return False
 
+    def add_fields_from_schema(self, _schema, _index="t0", t_index=1):
+        _fields = []
+        aliases = {'t0': ''}
+        sql_tables = ''
+
+        for name, field in sorted(_schema.fields.items()):
+            db_field = field.metadata.get('db_field', ''). \
+                            format(t_index=_index) or f"{_index}.{name}"
+
+            if field.__class__.__name__ == 'JoinNested':
+                sql_tables += "{} {} as t{} on {}.{} ".format(
+                    field.joinType,
+                    field.table,
+                    t_index,
+                    't%d' % t_index,
+                    field.joinOn
+                )
+                aliases['t{}'.format(t_index)] = name
+                nested_data = self.add_fields_from_schema(field.nested(), 't%d' % t_index)
+                _fields.append(nested_data["fields"])
+                aliases.update(nested_data["aliases"])
+                sql_tables += nested_data["sql_tables"]
+                t_index += 1
+            else:
+                if not field.dump_only:
+                    _fields.append(f"{db_field} as {_index}__{name}")
+        return {
+            "fields": ",".join(_fields),
+            "aliases": aliases,
+            "sql_tables": sql_tables,
+        }
+
     # Helper to convert data into beautifull json
     def join_prepare_fields(self, fields="*"):
         _fields = []
@@ -160,28 +192,11 @@ class SchemaOptionsView(OptionsView):
 
         sql.table = self.obj.table
 
-        def add_fields(_schema, _index="t0", t_index=1):
-            for name, field in sorted(_schema.fields.items()):
-                db_field = field.metadata.get('db_field', ''). \
-                               format(t_index=_index) or f"{_index}.{name}"
-
-                if field.__class__.__name__ == 'JoinNested':
-                    sql.table += "{} {} as t{} on {}.{} ".format(
-                        field.joinType,
-                        field.table,
-                        t_index,
-                        't%d' % t_index,
-                        field.joinOn
-                    )
-                    alias['t{}'.format(t_index)] = name
-                    add_fields(field.nested(), 't%d' % t_index)
-                    t_index += 1
-                else:
-                    if not field.dump_only:
-                        _fields.append(f"{db_field} as {_index}__{name}")
-
         if self.schema:
-            add_fields(self.schema())
+            schema_data = self.add_fields_from_schema(self.schema())
+            _fields.append(schema_data["fields"])
+            alias.update(schema_data["aliases"])
+            sql.table += schema_data["sql_tables"]
 
         fields = ",".join(_fields) if len(_fields) else fields
         return alias, fields
