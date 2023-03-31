@@ -85,10 +85,8 @@ class Manager:
 
         await self.select(fields=fields, where='id={id}', params={'id': id})
 
-        # ToDo
-        # What if we are using this for the list?
-        # we should just return count of objects returned by select
-        if self.id is None:
+        if (self.is_list and not self.data) or \
+            (not self.is_list and self.id is None):
             raise JSONHTTPError(
                 {'error': f'Object {self.__class__.__name__} not found by get_by_id'},
                 web.HTTPNotFound,
@@ -119,10 +117,8 @@ class Manager:
             params=filters
         )
 
-        # ToDo
-        # What if we are using this for the list?
-        # we should just return count of objects returned by select
-        if self.id is None:
+        if (self.is_list and not self.data) or \
+            (not self.is_list and self.id is None):
             raise JSONHTTPError(
                 {'error': f'Object {self.__class__.__name__} not found by get_by'},
                 web.HTTPNotFound,
