@@ -1,11 +1,15 @@
+import logging
 import importlib
 import os.path
+
+from ..logging.helpers import NoHeathCheckLogs
 
 # Create as a class
 config = {
     'web_run': {
-        'host': os.environ.get('HOST', 'localhost'),
-        'port': int(os.environ.get('PORT', 8080)),
+        'host': os.environ.get('HOST'),
+        'port': int(os.environ.get('PORT')),
+        'access_log_class': NoHeathCheckLogs,
     },
     'postgres': {
         'database': os.environ.get('DB_DATABASE', 'test'),
