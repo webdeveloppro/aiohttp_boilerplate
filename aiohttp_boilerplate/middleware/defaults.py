@@ -6,8 +6,11 @@ from aiohttp import web, hdrs
 async def cross_origin_rules(request, handler):
 
     # Allow requests from subdomains
+    print(request.headers)
+    print(request)
     domain = request.app.conf.get('domain', '')
-    allow = f"{request.headers.get('scheme', 'https')}://{domain}"
+    # allow = f"{request.headers.get('scheme', 'https')}://{domain}"
+    allow = f"http://{domain}"
     origin = str(request.headers.get('origin', ''))
     refer = str(request.headers.get('referer', ''))
     if origin.count(domain) > 0:
