@@ -1,32 +1,40 @@
-import logging
+import environ
 import importlib
 import os.path
 
 from ..logging.helpers import NoHeathCheckLogs
 
+# reading .env file
+environ.Env.read_env()
+env = environ.Env() # FixMe, read .env from application home dir
+
+
 # Create as a class
 config = {
     'web_run': {
-        'host': os.environ.get('HOST'),
-        'port': int(os.environ.get('PORT')),
+        'host': env.str('HOST'),
+        'port': env.int('PORT'),
         'access_log_class': NoHeathCheckLogs,
     },
     'postgres': {
-        'database': os.environ.get('DB_DATABASE', 'test'),
-        'password': os.environ.get('DB_PASSWORD', ''),
-        'user': os.environ.get('DB_USER', 'postgres'),
-        'host': os.environ.get('DB_HOST', 'localhost'),
-        'port': int(os.environ.get('DB_PORT', 5432)),
-        'min_size': int(os.environ.get('POSTGRES_MINSIZE', 5)),
-        'max_size': int(os.environ.get('POSTGRES_MAXSIZE', 15)),
-        'statement_cache_size': int(os.environ.get('STATEMENT_CACHE_SIZE', 0))
+        'database': env.str('DB_DATABASE'),
+        'password': env.str('DB_PASSWORD'),
+        'user': env.str('DB_USER'),
+        'host': env.str('DB_HOST'),
+        'port': env.int('DB_PORT'),
+        'min_size': env.int('DB_MIN_CONNECTIONS', 2),
+        'max_size': env.int('DB_MAX_CONNECTIONS'),
+        'statement_cache_size': env.int('DB_STATEMENT_CACHE_SIZE', 0)
+        # ToDo
+        # Add hostname to the db
+        # ToDo
+        # Add DB_SSL_MODE parameter
     },
-    'hostname': os.environ.get('HOSTNAME', ''),
-    'AIOCACHE_DISABLE': os.environ.get('AIOCACHE_DISABLE', False),
-    'app_dir': os.environ.get('APP_DIR', 'app'),
-    'domain': os.environ.get('DOMAIN', 'example.com'),
-    'AUTH_URL': os.environ.get('AUTH_URL', ''),
-    'DEBUG': int(os.environ.get('DEBUG', 0)),
+    'hostname': env.str('HOSTNAME', ''),
+    'AIOCACHE_DISABLE': env.bool('AIOCACHE_DISABLE', False),
+    'app_dir': env.str('APP_DIR', 'app'),
+    'domain': env.str('DOMAIN'),
+    'AUTH_URL': env.str('AUTH_URL', ''), # ToDo move to auth service
     'middlewares': [
         'aiohttp_boilerplate.middleware.defaults.cross_origin_rules',
         'aiohttp_boilerplate.middleware.defaults.url_status_200',
