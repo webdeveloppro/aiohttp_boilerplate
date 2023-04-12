@@ -9,8 +9,7 @@ async def cross_origin_rules(request, handler):
     print(request.headers)
     print(request)
     domain = request.app.conf.get('domain', '')
-    # allow = f"{request.headers.get('scheme', 'https')}://{domain}"
-    allow = f"http://{domain}"
+    allow = f"{request.headers.get('scheme', 'https')}://{domain}"
     origin = str(request.headers.get('origin', ''))
     refer = str(request.headers.get('referer', ''))
     if origin.count(domain) > 0:
@@ -18,9 +17,10 @@ async def cross_origin_rules(request, handler):
     elif refer.count(domain) > 0:
         allow = refer
 
+    print(allow, origin, refer)
     response = await handler(request)
     response.headers['Access-Control-Allow-Credentials'] = 'true'
-    response.headers['Access-Control-Allow-Origin'] = 'http://local.webdevelop.us:8080'
+    response.headers['Access-Control-Allow-Origin'] = allow
     response.headers['Access-Control-Allow-Methods'] = \
         'GET, POST, PUT, OPTIONS, DELETE, PATCH'
     response.headers['Access-Control-Allow-Headers'] = \
