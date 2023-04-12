@@ -7,9 +7,9 @@ async def cross_origin_rules(request, handler):
 
     # Allow requests from subdomains
     domain = request.app.conf.get('domain', '')
-    allow = f"https://{domain}"
-    origin = str(request.headers.get('Origin', ''))
-    refer = str(request.headers.get('Referer', ''))
+    allow = f"{request.headers.get('scheme', 'https')}://{domain}"
+    origin = str(request.headers.get('origin', ''))
+    refer = str(request.headers.get('referer', ''))
     if origin.count(domain) > 0:
         allow = origin
     elif refer.count(domain) > 0:
