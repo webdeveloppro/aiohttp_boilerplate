@@ -20,7 +20,7 @@ async def cross_origin_rules(request, handler):
 
     response = await handler(request)
     response.headers['Access-Control-Allow-Credentials'] = 'true'
-    response.headers['Access-Control-Allow-Origin'] = allow
+    response.headers['Access-Control-Allow-Origin'] = 'http://local.webdevelop.us:8080/'
     response.headers['Access-Control-Allow-Methods'] = \
         'GET, POST, PUT, OPTIONS, DELETE, PATCH'
     response.headers['Access-Control-Allow-Headers'] = \
