@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = ">=3.7"
-aiohttp = "3.6.2"
+aiohttp = "3.8.5"
 asyncpg = "0.28.0"
 marshmallow = "2.19.5"
 ujson = "1.35"
