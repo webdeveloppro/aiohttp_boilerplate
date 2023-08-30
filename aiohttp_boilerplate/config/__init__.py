@@ -21,7 +21,8 @@ config = {
         'server_settings': {
             'application_name': os.environ.get('HOSTNAME', os.environ.get('APPLICATION_NAME', '')),
         },
-        'statement_cache_size': int(os.environ.get('STATEMENT_CACHE_SIZE', 0))
+        'statement_cache_size': int(os.environ.get('STATEMENT_CACHE_SIZE', 0)),
+        'max_inactive_connection_lifetime': env.int('DB_MAX_INACTIVE_CONNECTION_LIFETIME', 300)
     },
     'AIOCACHE_DISABLE': os.environ.get('AIOCACHE_DISABLE', False),
     'app_dir': os.environ.get('APP_DIR', 'app'),
