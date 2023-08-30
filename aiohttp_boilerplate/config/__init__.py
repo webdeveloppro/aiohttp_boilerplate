@@ -24,7 +24,8 @@ config = {
         'port': env.int('DB_PORT'),
         'min_size': env.int('DB_MIN_CONNECTIONS', 2),
         'max_size': env.int('DB_MAX_CONNECTIONS'),
-        'statement_cache_size': env.int('DB_STATEMENT_CACHE_SIZE', 0)
+        'statement_cache_size': env.int('DB_STATEMENT_CACHE_SIZE', 0),
+        'max_inactive_connection_lifetime': env.int('DB_MAX_INACTIVE_CONNECTION_LIFETIME', 300)
         # ToDo
         # Add hostname to the db
         # ToDo
