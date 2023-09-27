@@ -9,6 +9,10 @@ async def cross_origin_rules(request, handler):
     domain = request.app.conf.get('domain', '')
     allow = f"{request.headers.get('scheme', 'https')}://{domain}"
     origin = str(request.headers.get('origin', ''))
+    print("origin ", origin, allow)
+    if origin == "":
+        origin = str(request.headers.get('referer', ''))
+    print("origin ", origin, allow)
     if origin.count(domain) > 0:
         allow = origin
 
