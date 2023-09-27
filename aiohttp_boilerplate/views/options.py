@@ -1,5 +1,6 @@
 import json
 import warnings
+import logging
 
 from aiohttp import web
 
@@ -7,14 +8,14 @@ from . import fixed_dump
 from .exceptions import JSONHTTPError
 
 
-# Retrieve data from database and send to the client
-# Schema is telling how to for transfer data from SQL to JSON format
+# Schema is telling on how to transfer data from SQL to JSON format
 class OptionsView(web.View):
     """ Base class have implementation of the 'OPTIONS' method
         Class provide isamorphic way to do validation for front/backed
     """
 
     def __init__(self, request):
+        request.log.debug(f"request=${request}")
         super().__init__(request)
         self.request_data = None
 
@@ -27,6 +28,7 @@ class OptionsView(web.View):
 
     # Read data from request and save in request_data
     async def get_request_data(self, to_json=False):
+        self.request.log.debug(f"to_json=${to_json}")
         if self.request_data is None:
             self.request_data = await self.request.text()
 
@@ -55,8 +57,6 @@ class OptionsView(web.View):
 # Options request with a schema data
 class SchemaOptionsView(OptionsView):
 
-    # ToDo
-    # Read about * in python 3.6
     def __init__(self, request):
         super().__init__(request)
         self.schema = self.get_schema()
@@ -66,6 +66,7 @@ class SchemaOptionsView(OptionsView):
         return None
 
     async def get_schema_data(self, partial=False, schema=None):
+        self.request.log.debug(f"partial=${partial}, schema=${schema}")
 
         if schema is None:
             schema = self.schema
@@ -261,6 +262,7 @@ class ObjectView(SchemaOptionsView):
 
     # Return context for and object
     async def get_data(self, obj):
+        self.request.log.debug(f"obj=${obj}")
 
         data = {}
         if self.schema:

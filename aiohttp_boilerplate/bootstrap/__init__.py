@@ -1,5 +1,10 @@
 import asyncio
-import uvloop
+
+try:
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ModuleNotFoundError:
+    pass
 
 from aiohttp import web
 from aiohttp_boilerplate import config
@@ -13,10 +18,6 @@ __all__ = ('web_app', 'console_app', 'get_loop',)
 
 
 def get_loop() -> asyncio.AbstractEventLoop:
-
-    # ToDo
-    # Check if asyncio does not have any event loop already?
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     return asyncio.get_event_loop()
 
 def console_app(loop=None):
@@ -40,4 +41,9 @@ def web_app():
     ))
 
     app = start_web_app(conf, db_pool, loop)
-    web.run_app(app=app, loop=loop, **conf['web_run'])
+    runner = web.AppRunner(app)
+    # runner._kwargs["_cls"] = Request
+    loop.run_until_complete(runner.setup())
+    site = web.TCPSite(runner, host=conf['web_run']['host'], port=conf['web_run']['port'])
+    loop.run_until_complete(site.start())
+    loop.run_forever()

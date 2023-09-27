@@ -6,6 +6,7 @@ import types
 from functools import partial
 
 from .exceptions import JSONHTTPError
+from .request import Context
 
 # JSON serialization tuning
 # Fix for datetime, decimal, memoryview and bytes type
@@ -28,3 +29,5 @@ def fix_json(obj):
 
 
 fixed_dump = partial(json.dumps, indent=None, default=fix_json)
+
+__all__ = ('JSONHTTPError', 'Context', 'fixed_dump', )

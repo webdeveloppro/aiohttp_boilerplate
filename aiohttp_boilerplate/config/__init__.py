@@ -1,8 +1,7 @@
 import environ
 import importlib
-import os.path
 
-from ..logging.helpers import NoHeathCheckLogs
+from ..logging.helpers import GCPLogger
 
 # reading .env file
 environ.Env.read_env()
@@ -14,7 +13,7 @@ config = {
     'web_run': {
         'host': env.str('HOST'),
         'port': env.int('PORT'),
-        'access_log_class': NoHeathCheckLogs,
+        'access_log_class': None,
     },
     'postgres': {
         'database': env.str('DB_DATABASE'),
@@ -40,6 +39,8 @@ config = {
         'aiohttp_boilerplate.middleware.defaults.cross_origin_rules',
         'aiohttp_boilerplate.middleware.defaults.url_status_200',
         'aiohttp_boilerplate.middleware.defaults.erase_header_server',
+        'aiohttp_boilerplate.middleware.logger_to_request.logger_to_request',
+        'aiohttp_boilerplate.middleware.x_request_id.x_request_id',
     ]
 }
 

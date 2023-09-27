@@ -1,18 +1,16 @@
 import importlib
 
-from aiohttp import web, hdrs
+from aiohttp import web, web_app
 
 
 async def on_cleanup(app):
     await app.db_pool.close()
     # await app.loop.close()
 
-
 async def on_prepare(request, response):
-    response.headers[hdrs.SERVER] = ''
+    pass
 
-
-def start_web_app(conf, db_pool, loop=None):
+def start_web_app(conf, db_pool, loop=None) -> web_app.Application:
     middlewares = []
 
     if conf.get('middlewares'):

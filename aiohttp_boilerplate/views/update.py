@@ -17,11 +17,13 @@ class UpdateView(ObjectView):
         self.data = {}
 
     async def validate(self, data: dict) -> dict:
+        self.request.log.debug(f"data=${data}")
         """ Override that method for custom validation
         """
         return data
 
     async def perform_update(self, where: str, params: dict, data: dict) -> dict:
+        self.request.log.debug(f"where=${where}, params=${params}, data=${data}")
         ''' Runs after:
                 - successful validation method
                 - before_update method
@@ -30,6 +32,7 @@ class UpdateView(ObjectView):
         return await self.obj.update(where, params, data)
 
     async def before_update(self, data: dict) -> dict:
+        self.request.log.debug(f"data=${data}")
         ''' Runs after:
                 - successful validation method
             If you want to change your data before system calls insert method
@@ -38,6 +41,7 @@ class UpdateView(ObjectView):
         return data
 
     async def after_update(self, data: dict) -> dict:
+        self.request.log.debug(f"data=${data}")
         ''' Runs after:
                 - successful validation method
                 - before_create method
@@ -91,7 +95,7 @@ class UpdateView(ObjectView):
         return await self.patch()
 
     async def patch(self):
-        log.debug('%s %s', self.request.method, str(self.request.url))
+        self.request.log.debug('%s %s', self.request.method, str(self.request.url))
         try:
             return await self._patch()
         except Exception as err:
@@ -100,16 +104,15 @@ class UpdateView(ObjectView):
                 if err.status_code >= 400 and err.status_code < 500:
                     raise err
 
-            log.error(err, exc_info=True)
+            self.request.log.error(err, exc_info=True)
             err_msg = 'HTTP Internal Server Error'
-            
+
             if log.level == logging.DEBUG:
                 err_msg = str(err)
-            
+
             raise JSONHTTPError(
                 {'error': err_msg}, web.HTTPInternalServerError
             ) from err
 
     async def put(self):
-        log.debug('%s %s', self.request.method, str(self.request.url))
         return await self._put()

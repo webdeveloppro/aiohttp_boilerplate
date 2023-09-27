@@ -32,24 +32,9 @@ async def url_status_200(request, handler):
         response = await handler(request)
     return response
 
-
+# Remove server info
 @web.middleware
 async def erase_header_server(request, handler):
-    try:
-        response = await handler(request)
-    except web.HTTPException as exc:
-        response = exc
-    except Exception:
-        response = web.Response(
-            status=500,
-            text='{"error":"Something went wrong"}',
-            content_type='application/json'
-        )
-        import traceback
-        import sys
-        exc_info = sys.exc_info()
-        traceback.print_exception(*exc_info)
-        del exc_info
-
+    response = await handler(request)
     response.headers[hdrs.SERVER] = ''
     return response
