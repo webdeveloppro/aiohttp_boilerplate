@@ -105,5 +105,4 @@ env.myvar
 .cache
 .pytest_cache
 
-aiohttp_boilerplate
 .env.local
