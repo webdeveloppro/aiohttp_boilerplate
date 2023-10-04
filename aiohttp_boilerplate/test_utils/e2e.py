@@ -39,7 +39,7 @@ class E2ETestCase(UnitTestCase):
             con = await self.app.db_pool.acquire()
             for name, path in self.fixtures.items():
                 self.loaded_fixtures[name] = await self.load_fixture(path, con)
-                print("Loaded: {}: {}".format(path, len(self.loaded_fixtures[name])))
+                # print("Loaded: {}: {}".format(path, len(self.loaded_fixtures[name])))
 
             await self.app.db_pool.release(con)
 
@@ -50,7 +50,7 @@ class E2ETestCase(UnitTestCase):
 
         try:
             async with con.transaction():
-                print('Loading {}'.format(path))
+                # print('Loading {}'.format(path))
                 await fixture.file2db(con)
         except Exception as err:
             logging.error(err, exc_info=True)

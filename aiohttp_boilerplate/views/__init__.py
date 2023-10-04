@@ -1,7 +1,6 @@
 import datetime
 import decimal
 import json
-import sys
 import types
 from functools import partial
 
@@ -24,8 +23,7 @@ def fix_json(obj):
         return bytes(obj)
     if isinstance(obj, types.MethodType):
         return obj()
-    print('unknown type: ', type(obj), obj, file=sys.stderr)
-    raise TypeError
+    raise TypeError('unknown type: ', type(obj), obj)
 
 
 fixed_dump = partial(json.dumps, indent=None, default=fix_json)
