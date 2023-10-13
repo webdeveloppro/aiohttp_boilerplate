@@ -18,6 +18,8 @@ class OptionsView(web.View):
         request.log.debug(f"request=${request}")
         super().__init__(request)
         self.request_data = None
+        self.app = self.request.app
+        self.db_pool = self.request.app.db_pool
 
     # On start will always run before any other methods
     async def on_start(self):
