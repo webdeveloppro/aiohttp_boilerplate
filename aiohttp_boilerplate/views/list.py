@@ -108,6 +108,15 @@ class ListView(RetrieveView):
 
         return data
 
+    async def combine_response(self) -> dict:
+        return {
+            'data': await self.get_data(self.objects.data),
+            'count': await self.get_count(
+                where=self.where,
+                params=self.params,
+            )
+        }
+
     async def _get(self):
         await self.on_start()
 
@@ -121,14 +130,7 @@ class ListView(RetrieveView):
             params=self.params,
         )
         await self.after_get()
-
-        return {
-            'data': await self.get_data(self.objects.data),
-            'count': await self.get_count(
-                where=self.where,
-                params=self.params,
-            )
-        }
+        return await self.combine_response()
 
     async def get(self):
         log.debug('%s %s', self.request.method, str(self.request.url))
