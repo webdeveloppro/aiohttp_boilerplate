@@ -6,6 +6,9 @@ try:
 except ModuleNotFoundError:
     pass
 
+import logging
+from pythonjsonlogger import jsonlogger
+
 from aiohttp import web
 from aiohttp_boilerplate import config
 from aiohttp_boilerplate.dbpool import pg as db
@@ -24,7 +27,7 @@ def console_app(loop=None):
     if loop is None:
         loop = get_loop()
 
-    conf = loop.run_until_complete(config.load_config(loop=loop))
+    conf = loop.run_until_complete(config.load_config())
     db_pool = loop.run_until_complete(db.create_pool(
         loop=loop,
         conf=conf['postgres']
@@ -34,7 +37,10 @@ def console_app(loop=None):
 
 def web_app():
     loop = get_loop()
-    conf = loop.run_until_complete(config.load_config(loop=loop))
+    conf = loop.run_until_complete(config.load_config())
+
+    setup_global_logger(conf['log']['format'], conf['log']['level'])
+
     db_pool = loop.run_until_complete(db.create_pool(
         conf=conf['postgres'],
         loop=loop,
@@ -47,3 +53,15 @@ def web_app():
     site = web.TCPSite(runner, host=conf['web_run']['host'], port=conf['web_run']['port'])
     loop.run_until_complete(site.start())
     loop.run_forever()
+
+def setup_global_logger(format, level):
+    if format == 'json':
+        logger = logging.getLogger()
+
+        logHandler = logging.StreamHandler()
+        formatter = jsonlogger.JsonFormatter()
+        logHandler.setFormatter(formatter)
+        logger.handlers = []
+        logger.addHandler(logHandler)
+    
+    logger.setLevel(level.upper())
