@@ -7,3 +7,4 @@ ujson==5.8.0
 aiocache==0.12.2
 python-json-logger==2.0.7
 django_environ==0.11.2
+python-json-logger==2.0.7

@@ -15,6 +15,10 @@ config = {
         'port': env.int('PORT'),
         'access_log_class': None,
     },
+    'log': {
+        'level': env.str('LOG_LEVEL'),
+        'format': env.str('LOG_FORMAT'),
+    },
     'postgres': {
         'database': env.str('DB_DATABASE'),
         'password': env.str('DB_PASSWORD'),
@@ -53,5 +57,5 @@ except ModuleNotFoundError:
 
 
 # Incase if you will have to load your config from file or database
-async def load_config(loop):
+async def load_config():
     return config
