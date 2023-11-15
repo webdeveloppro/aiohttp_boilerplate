@@ -3,6 +3,9 @@ import logging
 import sys
 import uvloop
 
+import logging
+from pythonjsonlogger import jsonlogger
+
 from aiohttp import web
 from asyncpg.exceptions import PostgresError
 from aiohttp_boilerplate import config
@@ -58,6 +61,9 @@ def console_app(loop=None):
 def web_app():
     loop = get_loop()
     conf = loop.run_until_complete(config.load_config(loop=loop))
+
+    setup_global_logger(conf['log']['format'], conf['log']['level'])
+    
     db_pool = loop.run_until_complete(db.create_pool(
         conf=conf['postgres'],
         loop=loop,
@@ -70,3 +76,15 @@ def web_app():
 
     app = start_web_app(conf, db_pool, loop)
     web.run_app(app, **conf['web_run'])
+
+def setup_global_logger(format, level):
+    if format == 'json':
+        logger = logging.getLogger()
+
+        logHandler = logging.StreamHandler()
+        formatter = jsonlogger.JsonFormatter()
+        logHandler.setFormatter(formatter)
+        logger.handlers = []
+        logger.addHandler(logHandler)
+    
+    logger.setLevel(level.upper())
