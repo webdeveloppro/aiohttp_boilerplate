@@ -47,13 +47,18 @@ class LoadFixture:
 
             self.table = t
 
+    async def truncate(self, con):
+        ''' Truncate table and cascade tables '''
+        await con.execute(f"TRUNCATE {self.table} CASCADE")
+
+
     async def file2db(self, con):
         ''' Read data from file and save in the data array '''
         filename = self.directory + '/' + self.file
 
         self.data = json.loads(open(filename, 'r').read())
 
-        await con.execute(f"TRUNCATE {self.table} CASCADE")
+        await con.execute(f"DELETE FROM {self.table}; select setval('{self.table}_id_seq',(select max(id) from {self.table}));")
 
         for row in self.data:
             field_names = []

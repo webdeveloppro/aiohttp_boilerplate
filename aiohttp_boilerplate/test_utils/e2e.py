@@ -20,7 +20,7 @@ class E2ETestCase(UnitTestCase):
         """Override the get_app method to return your application.
         """
         # it's important to use the loop passed here.
-        conf = await config.load_config(loop=self.loop)
+        conf = await config.load_config()
         db_pool = await db.create_pool(
             conf=conf['postgres'],
             loop=self.loop,
@@ -37,11 +37,27 @@ class E2ETestCase(UnitTestCase):
         await super().setUpAsync()
         if len(self.fixtures.keys()) > 0:
             con = await self.app.db_pool.acquire()
+            # Truncate all the tables first
+            for name, path in self.fixtures.items():
+                await self.truncate_table(path, con)
             for name, path in self.fixtures.items():
                 self.loaded_fixtures[name] = await self.load_fixture(path, con)
                 # print("Loaded: {}: {}".format(path, len(self.loaded_fixtures[name])))
 
             await self.app.db_pool.release(con)
+
+    async def truncate_table(self, path, con):
+
+        directory, _file = path.rsplit('/', 1)
+        fixture = LoadFixture(_file, directory)
+
+        try:
+            async with con.transaction():
+                # print('Loading {}'.format(path))
+                await fixture.truncate(con)
+        except Exception as err:
+            logging.error(err)
+            raise Exception("cannot truncate {}, {}".format(path, str(err)))
 
     async def load_fixture(self, path, con):
 
@@ -53,7 +69,7 @@ class E2ETestCase(UnitTestCase):
                 # print('Loading {}'.format(path))
                 await fixture.file2db(con)
         except Exception as err:
-            logging.error(err, exc_info=True)
+            logging.error(err)
             raise Exception("cannot upload file {}, {}".format(path, str(err)))
 
         return fixture.data
