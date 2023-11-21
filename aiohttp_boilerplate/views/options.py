@@ -1,6 +1,6 @@
 import json
 import warnings
-import logging
+import marshmallow
 
 from aiohttp import web
 
@@ -79,13 +79,12 @@ class SchemaOptionsView(OptionsView):
 
         try:
             schema_result = schema().loads(data, partial=partial)
-        except Exception as exp:
-            raise JSONHTTPError({'error': str(exp)})
+        except marshmallow.ValidationError as err:
+            raise JSONHTTPError(err.messages)
+        except Exception as err:
+            raise JSONHTTPError(err)
 
-        if len(schema_result.errors):
-            raise JSONHTTPError(schema_result.errors)
-
-        return schema_result.data
+        return schema_result
 
     # Will return options request with validation data for a frontend
     def _getValidation(self, field):
