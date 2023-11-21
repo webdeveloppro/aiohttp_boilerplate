@@ -6,6 +6,7 @@ from aiohttp import web
 
 from . import fixed_dump
 from .exceptions import JSONHTTPError
+from marshmallow_jsonschema import JSONSchema
 
 
 # Schema is telling on how to transfer data from SQL to JSON format
@@ -40,7 +41,7 @@ class OptionsView(web.View):
         return self.request_data
 
     async def _options(self):
-        return self._fields(self.schema()) if hasattr(self, 'schema') \
+        return self.json_schema(self.schema()) if hasattr(self, 'schema') \
             and self.schema is not None else {}
 
     # Will return options request with fields meta data
@@ -85,6 +86,11 @@ class SchemaOptionsView(OptionsView):
             raise JSONHTTPError(err)
 
         return schema_result
+    
+     # Return json schema for marshmellow form)
+    def json_schema(self, schema):
+        json_schema = JSONSchema()
+        return json_schema.dump(schema)
 
     # Will return options request with validation data for a frontend
     def _getValidation(self, field):
