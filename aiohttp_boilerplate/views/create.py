@@ -6,6 +6,7 @@ from .exceptions import JSONHTTPError, log
 
 
 class CreateView(ObjectView):
+    partial = False
 
     def __init__(self, request):
         super().__init__(request)
@@ -63,7 +64,7 @@ class CreateView(ObjectView):
 
         data = {}
         if self.schema:
-            data = await self.get_schema_data(partial=False)
+            data = await self.get_schema_data(partial=self.partial)
         else:
             data = await self.get_request_data(to_json=True)
 

@@ -8,8 +8,8 @@ from .exceptions import JSONHTTPError
 from .request import Context
 
 # JSON serialization tuning
-# Fix for datetime, decimal, memoryview and bytes type
 def fix_json(obj):
+    from .. import models
     if isinstance(obj, decimal.Decimal):
         return float(obj)
     # ToDo
@@ -23,6 +23,8 @@ def fix_json(obj):
         return bytes(obj)
     if isinstance(obj, types.MethodType):
         return obj()
+    if isinstance(obj, models.Manager):
+        return obj.data
     raise TypeError('unknown type: ', type(obj), obj)
 
 
