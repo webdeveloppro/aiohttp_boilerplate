@@ -40,8 +40,8 @@ class Auth:
         if token == '':
             token = self.request.headers.get('Cookie', '')
             headers = {'Cookie': token}
-        self.request.log.debug('%s %s', self.app.cfg['AUTH_URL'], headers)
-        self.auth = await validate_token(headers, self.app.cfg['AUTH_URL'])
+        self.request.log.debug("check token  " + self.app.conf['AUTH_URL'] + " with " + token)
+        self.auth = await validate_token(headers, self.app.conf['AUTH_URL'])
 
         if check_permissions:
             await self.check_permission()
