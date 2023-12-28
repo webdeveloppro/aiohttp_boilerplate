@@ -11,7 +11,7 @@ from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 async def validate_token(headers: dict) -> Mapping:
     async with aiohttp.ClientSession(json_serialize=ujson, headers=headers) as session:
         cfg = await config.load_config()
-        async with session.get(config['AUTH_URL']) as resp:
+        async with session.get(cfg['AUTH_URL']) as resp:
             if resp.status != 204 and resp.status != 200:
                 raise JSONHTTPError(
                     {"__error__": "Invalid key"},
