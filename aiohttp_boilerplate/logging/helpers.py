@@ -40,7 +40,7 @@ class GCPLogger(logging.Logger):
             logHandler.setFormatter(formatter)
             self.addHandler(logHandler)
 
-        # self.addFilter(self.skip_healtcheck)
+        self.addFilter(self.skipHealtcheck)
         # self.addFilter(self.add_extra)
             
     def new_component_logger(self, name):
