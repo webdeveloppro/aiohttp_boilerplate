@@ -18,7 +18,7 @@ class UnitTestCase(AioHTTPTestCase):
         """Override the get_app method to return your application.
         """
         # it's important to use the loop passed here.
-        conf = await config.load_config()
+        conf = await config.load_config(loop=self.loop)
 
         db_pool = await dummy.create_pool(
             conf=conf['postgres'],
@@ -30,9 +30,6 @@ class UnitTestCase(AioHTTPTestCase):
             db_pool=db_pool,
             loop=self.loop,
         )
-
-        app.db_pool = db_pool
-        self.conf = conf
         return app
 
     async def request(self, url, method, data=None, headers=None):

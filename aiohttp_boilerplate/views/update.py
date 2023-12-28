@@ -1,8 +1,8 @@
+import logging
 from aiohttp import web
 
-from aiohttp_boilerplate.config import config
-from .exceptions import JSONHTTPError
 from .options import ObjectView
+from .exceptions import JSONHTTPError, log
 
 
 class UpdateView(ObjectView):
@@ -17,11 +17,13 @@ class UpdateView(ObjectView):
         self.data = {}
 
     async def validate(self, data: dict) -> dict:
+        self.request.log.debug(f"data=${data}")
         """ Override that method for custom validation
         """
         return data
 
     async def perform_update(self, where: str, params: dict, data: dict) -> dict:
+        self.request.log.debug(f"where=${where}, params=${params}, data=${data}")
         ''' Runs after:
                 - successful validation method
                 - before_update method
@@ -30,6 +32,7 @@ class UpdateView(ObjectView):
         return await self.obj.update(where, params, data)
 
     async def before_update(self, data: dict) -> dict:
+        self.request.log.debug(f"data=${data}")
         ''' Runs after:
                 - successful validation method
             If you want to change your data before system calls insert method
@@ -37,7 +40,8 @@ class UpdateView(ObjectView):
         '''
         return data
 
-    async def after_update(self, data: dict):
+    async def after_update(self, data: dict) -> dict:
+        self.request.log.debug(f"data=${data}")
         ''' Runs after:
                 - successful validation method
                 - before_create method
@@ -47,7 +51,7 @@ class UpdateView(ObjectView):
 
             new object data is self.obj
         '''
-        pass
+        return data
 
     async def _patch(self):
         ''' Post method handler, will run one by one
@@ -68,48 +72,22 @@ class UpdateView(ObjectView):
         else:
             data = await self.get_request_data(to_json=True)
 
+        data = await self.validate(data)
         if len(data) == 0:
-            raise JSONHTTPError({'error': 'No content'})
-
-        try:
-            data = await self.validate(data)
-        except Exception as e:
-            # ToDo
-            # Add logger
-            if config['DEBUG'] > 0:
-                import traceback
-                import sys
-                print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
-                print("Error: ", e, file=sys.stderr)
-            raise JSONHTTPError({'error': e})
+            raise JSONHTTPError({'error': 'No content'}, web.HTTPBadRequest)
 
         self.data.update(await self.before_update(data))
-        try:
-            updated = await self.perform_update(
-                where=self.where,
-                params=self.params,
-                data=self.data,
-            )
-            if updated == 0:
-                raise JSONHTTPError({'error': 'No object updated'})
+        updated = await self.perform_update(
+            where=self.where,
+            params=self.params,
+            data=self.data,
+        )
 
-        except Exception as e:
-            # ToDo
-            # Add logger
-            if config['DEBUG'] > 0:
-                import traceback
-                import sys
-                traceback.print_exc(file=sys.stderr)
-                # print('\n'.join([str(line) for line in traceback.extract_stack()]), file=sys.stderr)
-                print("Error: ", e, file=sys.stderr)
+        if updated == 0:
+            raise JSONHTTPError({'error': 'No object updated'}, web.HTTPNotFound)
 
-            raise JSONHTTPError(
-                {'error': str(e)},
-                web.HTTPInternalServerError
-            )
-
-        await self.after_update(self.data)
-        response = await self.get_data(self.obj.data)
+        self.data.update(await self.after_update(data))
+        response = await self.get_data(self.obj)
         return self.json_response(response)
 
     async def _put(self):
@@ -117,7 +95,24 @@ class UpdateView(ObjectView):
         return await self.patch()
 
     async def patch(self):
-        return await self._patch()
+        self.request.log.debug('%s %s', self.request.method, str(self.request.url))
+        try:
+            return await self._patch()
+        except Exception as err:
+            # show any 4xx errors directly
+            if hasattr(err, 'status_code'):
+                if err.status_code >= 400 and err.status_code < 500:
+                    raise err
+
+            self.request.log.error(err, exc_info=True)
+            err_msg = 'HTTP Internal Server Error'
+
+            if log.level == logging.DEBUG:
+                err_msg = str(err)
+
+            raise JSONHTTPError(
+                {'error': err_msg}, web.HTTPInternalServerError
+            ) from err
 
     async def put(self):
         return await self._put()

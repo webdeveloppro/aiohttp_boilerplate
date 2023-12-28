@@ -1,22 +1,26 @@
 import json
 import warnings
+import marshmallow
 
 from aiohttp import web
 
 from . import fixed_dump
 from .exceptions import JSONHTTPError
+from marshmallow_jsonschema import JSONSchema
 
 
-# Retrieve data from database and send to the client
-# Schema is telling how to for transfer data from SQL to JSON format
+# Schema is telling on how to transfer data from SQL to JSON format
 class OptionsView(web.View):
     """ Base class have implementation of the 'OPTIONS' method
         Class provide isamorphic way to do validation for front/backed
     """
 
     def __init__(self, request):
+        request.log.debug(f"request=${request}")
         super().__init__(request)
         self.request_data = None
+        self.app = self.request.app
+        self.db_pool = self.request.app.db_pool
 
     # On start will always run before any other methods
     async def on_start(self):
@@ -27,6 +31,7 @@ class OptionsView(web.View):
 
     # Read data from request and save in request_data
     async def get_request_data(self, to_json=False):
+        self.request.log.debug(f"to_json=${to_json}")
         if self.request_data is None:
             self.request_data = await self.request.text()
 
@@ -36,7 +41,8 @@ class OptionsView(web.View):
         return self.request_data
 
     async def _options(self):
-        return self._fields(self.schema()) if hasattr(self, 'schema') else {}
+        return self.json_schema(self.schema()) if hasattr(self, 'schema') \
+            and self.schema is not None else {}
 
     # Will return options request with fields meta data
     async def options(self):
@@ -54,8 +60,6 @@ class OptionsView(web.View):
 # Options request with a schema data
 class SchemaOptionsView(OptionsView):
 
-    # ToDo
-    # Read about * in python 3.6
     def __init__(self, request):
         super().__init__(request)
         self.schema = self.get_schema()
@@ -65,6 +69,7 @@ class SchemaOptionsView(OptionsView):
         return None
 
     async def get_schema_data(self, partial=False, schema=None):
+        self.request.log.debug(f"partial=${partial}, schema=${schema}")
 
         if schema is None:
             schema = self.schema
@@ -75,27 +80,17 @@ class SchemaOptionsView(OptionsView):
 
         try:
             schema_result = schema().loads(data, partial=partial)
-        except Exception as e:
-            '''
-            ToDo
-            Create logging facility
+        except marshmallow.ValidationError as err:
+            raise JSONHTTPError(err.messages)
+        except Exception as err:
+            raise JSONHTTPError(err)
 
-            raise web.HTTPBadRequest(
-                text=json.dumps(_non_field_errors(
-                    traceback.format_exc(3, 100))),
-                headers={
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers':
-                    'Authorization, X-PINGOTHER, Content-Type, X-Requested-With'
-                },
-                content_type='application/json')
-            '''
-            raise JSONHTTPError({'error': str(e)})
-
-        if len(schema_result.errors):
-            raise JSONHTTPError(schema_result.errors)
-
-        return schema_result.data
+        return schema_result
+    
+     # Return json schema for marshmellow form)
+    def json_schema(self, schema):
+        json_schema = JSONSchema()
+        return json_schema.dump(schema)
 
     # Will return options request with validation data for a frontend
     def _getValidation(self, field):
@@ -161,6 +156,38 @@ class SchemaOptionsView(OptionsView):
                     return True
         return False
 
+    def add_fields_from_schema(self, _schema, _index="t0", t_index=1):
+        _fields = []
+        aliases = {'t0': ''}
+        sql_tables = ''
+
+        for name, field in sorted(_schema.fields.items()):
+            db_field = field.metadata.get('db_field', ''). \
+                            format(t_index=_index) or f"{_index}.{name}"
+
+            if field.__class__.__name__ == 'JoinNested':
+                sql_tables += "{} {} as t{} on {}.{} ".format(
+                    field.joinType,
+                    field.table,
+                    t_index,
+                    't%d' % t_index,
+                    field.joinOn
+                )
+                aliases['t{}'.format(t_index)] = name
+                nested_data = self.add_fields_from_schema(field.nested(), 't%d' % t_index)
+                _fields.append(nested_data["fields"])
+                aliases.update(nested_data["aliases"])
+                sql_tables += nested_data["sql_tables"]
+                t_index += 1
+            else:
+                if not field.dump_only:
+                    _fields.append(f"{db_field} as {_index}__{name}")
+        return {
+            "fields": ",".join(_fields),
+            "aliases": aliases,
+            "sql_tables": sql_tables,
+        }
+
     # Helper to convert data into beautifull json
     def join_prepare_fields(self, fields="*"):
         _fields = []
@@ -173,28 +200,11 @@ class SchemaOptionsView(OptionsView):
 
         sql.table = self.obj.table
 
-        def add_fields(_schema, _index="t0", t_index=1):
-            for name, field in sorted(_schema.fields.items()):
-                db_field = field.metadata.get('db_field', ''). \
-                               format(t_index=_index) or f"{_index}.{name}"
-
-                if field.__class__.__name__ == 'JoinNested':
-                    sql.table += "{} {} as t{} on {}.{} ".format(
-                        field.joinType,
-                        field.table,
-                        t_index,
-                        't%d' % t_index,
-                        field.joinOn
-                    )
-                    alias['t{}'.format(t_index)] = name
-                    add_fields(field.nested(), 't%d' % t_index)
-                    t_index += 1
-                else:
-                    if not field.dump_only:
-                        _fields.append(f"{db_field} as {_index}__{name}")
-
         if self.schema:
-            add_fields(self.schema())
+            schema_data = self.add_fields_from_schema(self.schema())
+            _fields.append(schema_data["fields"])
+            alias.update(schema_data["aliases"])
+            sql.table += schema_data["sql_tables"]
 
         fields = ",".join(_fields) if len(_fields) else fields
         return alias, fields
@@ -232,11 +242,14 @@ class ObjectView(SchemaOptionsView):
         super().__init__(request)
 
         self.id = None
-        self.obj = self.get_model()(db_pool=request.app.db_pool)
+        if self.get_model() is None:
+            warnings.warn('get_model return None', RuntimeWarning)
+        else:
+            self.obj = self.get_model()(db_pool=request.app.db_pool)
 
     # Return model object
     def get_model(self):
-        warnings.warn('Redefine get_schema in inherited class', RuntimeWarning)
+        warnings.warn('Redefine get_model in inherited class', RuntimeWarning)
         return None
 
     # Return object id from request
@@ -256,6 +269,7 @@ class ObjectView(SchemaOptionsView):
 
     # Return context for and object
     async def get_data(self, obj):
+        self.request.log.debug(f"obj=${obj}")
 
         data = {}
         if self.schema:
@@ -267,6 +281,8 @@ class ObjectView(SchemaOptionsView):
             for f in self.schema().fields:
                 data[f] = getattr(obj, f)
         else:
+            # ToDo
+            # use obj from incoming parameter
             data = self.obj.data
 
         return data

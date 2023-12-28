@@ -4,17 +4,16 @@ from aiohttp import web, hdrs
 # Restrict access for conf['domain'] domain and subdomains only
 @web.middleware
 async def cross_origin_rules(request, handler):
-    allow = "*"
 
-    if not request.app.conf.get('DEBUG') >= 1:
-        # Allow requests from subdomains
-        domain = request.app.conf.get('domain', '')
-        if request.headers.get('origin', '').count(domain) == 0:
-            allow = request.headers.get('scheme', 'https') + "://" + domain
-        else:
-            allow = request.headers.get('origin', '')
+    # Allow requests from subdomains
+    domain = request.app.conf.get('domain', '')
+    allow = f"{request.headers.get('scheme', 'https')}://{domain}"
+    origin = str(request.headers.get('origin', ''))
+    if origin.count(domain) > 0:
+        allow = origin
 
     response = await handler(request)
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
     response.headers['Access-Control-Allow-Origin'] = allow
     response.headers['Access-Control-Allow-Methods'] = \
         'GET, POST, PUT, OPTIONS, DELETE, PATCH'
@@ -33,24 +32,9 @@ async def url_status_200(request, handler):
         response = await handler(request)
     return response
 
-
+# Remove server info
 @web.middleware
 async def erase_header_server(request, handler):
-    try:
-        response = await handler(request)
-    except web.HTTPException as exc:
-        response = exc
-    except Exception:
-        response = web.Response(
-            status=500,
-            text='{"error":"Something went wrong"}',
-            content_type='application/json'
-        )
-        import traceback
-        import sys
-        exc_info = sys.exc_info()
-        traceback.print_exception(*exc_info)
-        del exc_info
-
+    response = await handler(request)
     response.headers[hdrs.SERVER] = ''
     return response

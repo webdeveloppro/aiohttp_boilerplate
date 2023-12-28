@@ -1,9 +1,8 @@
+from aiohttp import web
+
 from aiohttp_boilerplate.views import fixed_dump
+from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 from aiohttp_boilerplate.sql import SQL
-
-
-class ModelException(Exception):
-    pass
 
 
 class Manager:
@@ -19,9 +18,7 @@ class Manager:
         if is_list:
             self.data = []
         else:
-            self.data = {
-                'id': None
-            }
+            self.data = {}
 
         self.set_storage(self.table, storage, self.db_pool)
 
@@ -37,7 +34,7 @@ class Manager:
     def __getattribute__(self, key):
         try:
             return super().__getattribute__(key)
-        except AttributeError as e:
+        except AttributeError as err:
             if key != 'data':
                 if hasattr(self, 'data') is True:
                     if key in self.data:
@@ -45,7 +42,7 @@ class Manager:
                     else:
                         return None
 
-            raise AttributeError(str(e))
+            raise AttributeError(str(err)) from err
 
     def __setattr__(self, key, value):
 
@@ -88,8 +85,12 @@ class Manager:
 
         await self.select(fields=fields, where='id={id}', params={'id': id})
 
-        if self.id is None:
-            raise ModelException("Object not found get_by_id")
+        if (self.is_list and not self.data) or \
+            (not self.is_list and self.id is None):
+            raise JSONHTTPError(
+                {'error': f'Object {self.__class__.__name__} not found by get_by_id'},
+                web.HTTPNotFound,
+            )
 
         return self
 
@@ -106,7 +107,7 @@ class Manager:
         """
 
         if fields != '*' and 'id' not in fields.split(','):
-            fields = 'id,{}'.format(fields)
+            fields = f'id,{fields}'
 
         where = ' AND '.join(['{key}={{{key}}}'.format(key=f) for f in filters.keys()])
 
@@ -116,32 +117,42 @@ class Manager:
             params=filters
         )
 
-        if self.id is None:
-            raise ModelException("Object not found get_by")
+        if (self.is_list and not self.data) or \
+            (not self.is_list and self.id is None):
+            raise JSONHTTPError(
+                {'error': f'Object {self.__class__.__name__} not found by get_by'},
+                web.HTTPNotFound,
+            )
 
         return self
 
-    async def select(self, fields='*', join='', where='', order='', limit='', offset=None, params=None):
+    async def select(
+        self, fields='*', join='', where='', order='', limit='', offset=None, params=None
+    ):
         data = await self.sql.select(
             fields=fields, join=join, where=where, order=order, limit=limit, offset=offset,
             params=params, many=self.is_list
         )
         self.set_data(data)
         # ToDo
-        # Create function get_data
+        # select should return length of returned objects from db
         return self
 
     async def insert(self, data=None, load=0, **kwargs):
         data = data or {}
 
         data.update(kwargs)
+        self.set_data(data)
 
-        self.id = await self.sql.insert(data=data)
+        raw_result = await self.sql.insert(data=data)
+        self.set_data(raw_result)
 
         if load == 1:
             await self.select(where='id={id}', params={'id': self.id})
 
-        return self.id
+        # ToDo
+        # insert should return length amount of effected row
+        return self
 
     async def update(self, where='', params=None, data=None, **kwargs):
         """
@@ -183,7 +194,7 @@ class Manager:
         if self.is_list:
             self.data = []
         else:
-            self.id = None
+            self.data = {}
         return deleted
 
     async def get_count(self, where='', params=None):
@@ -198,6 +209,10 @@ class Manager:
 
 
 class JsonbManager(Manager):
+    # ToDo
+    # Add validation key_name is not None
+    __key_name__ = None
+    __update_type__ = 'update'
 
     async def select(self, fields='*', where='', order='', limit='', params=None):
 
@@ -215,18 +230,29 @@ class JsonbManager(Manager):
         return self.data
 
     async def insert(self, where, params, data):
+        # ToDo
+        # check where is not empty
+        # ToDo
+        # check __update_type_ is not empty and valid
 
         data = fixed_dump(data)
-        query = "update {table} set {key}=jsonb_set({key}, concat('{{',"
-        query += " jsonb_array_length({key}),'}}')::text[], '{data}'::jsonb) "
+        query = "update {table} set {key}="
+        if self.__update_type__ == 'append':
+            query += "jsonb_set({key}, concat('{{',"
+            query += " jsonb_array_length({key}),'}}')::text[], '{data}'::jsonb) "
+        elif self.__update_type__ == 'update':
+            query += "{key} || '{data}'"
+
+        query += ' where {where} RETURNING '
+        
+        if self.__update_type__ == 'append':
+            query += 'jsonb_array_length({key}) as r'
+        elif self.__update_type__ == 'update':
+            query += 'id'
         query = query.format(
             table=self.table,
             key=self.__key_name__,
-            data=data.replace("'", ""),
-        )
-
-        query += ' where {where} RETURNING jsonb_array_length({key}) as r'.format(
-            key=self.__key_name__,
+            data=data.replace("'", "\'"),
             where=self.sql.prepare_where(where, params)
         )
 
@@ -243,10 +269,13 @@ class JsonbManager(Manager):
         if 'index' not in params.keys():
             return await self.insert(where, params, data)
 
+        # ToDo
+        # check where is not empty
         data = fixed_dump(data)
 
         # FIXME
-        query = "update {table} set {key}=jsonb_set({key}, '{{{index}}}', '{data}'::jsonb) ".format(  # nosec
+        query = "UPDATE \
+            {table} set {key}=jsonb_set({key}, '{{{index}}}', '{data}'::jsonb) ".format(  # nosec
             table=self.table,
             key=self.__key_name__,
             data=data.replace("'", ""),

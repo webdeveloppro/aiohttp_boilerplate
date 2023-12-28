@@ -1,6 +1,9 @@
 import warnings
+import logging
+from aiohttp import web
 
 from .retrieve import RetrieveView
+from .exceptions import JSONHTTPError, log
 
 ALLOW_ORDER = ["asc", "desc"]
 
@@ -105,6 +108,15 @@ class ListView(RetrieveView):
 
         return data
 
+    async def combine_response(self) -> dict:
+        return {
+            'data': await self.get_data(self.objects.data),
+            'count': await self.get_count(
+                where=self.where,
+                params=self.params,
+            )
+        }
+
     async def _get(self):
         await self.on_start()
 
@@ -118,14 +130,24 @@ class ListView(RetrieveView):
             params=self.params,
         )
         await self.after_get()
-
-        return {
-            'data': await self.get_data(self.objects.data),
-            'count': await self.get_count(
-                where=self.where,
-                params=self.params,
-            )
-        }
+        return await self.combine_response()
 
     async def get(self):
-        return self.json_response(await self._get())
+        log.debug('%s %s', self.request.method, str(self.request.url))
+        try:
+            return self.json_response(await self._get())
+        except Exception as err:
+            # show any 4xx errors directly
+            if hasattr(err, 'status_code'):
+                if err.status_code >= 400 and err.status_code < 500:
+                    raise err
+
+            log.error(err, exc_info=True)
+            err_msg = 'HTTP Internal Server Error'
+            
+            if log.level == logging.DEBUG:
+                err_msg = str(err)
+            
+            raise JSONHTTPError(
+                {'error': err_msg}, web.HTTPInternalServerError
+            ) from err

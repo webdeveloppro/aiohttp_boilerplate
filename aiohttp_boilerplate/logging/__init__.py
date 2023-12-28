@@ -1,14 +1,41 @@
 import logging
+import importlib
 import os
+import sys
+import threading
 from logging import config as log_config
+from .helpers import GCPLogger
+from aiohttp_boilerplate.config import get_config
 
-from pkg_resources import resource_filename
+def get_logger(
+        name:str,
+        level:str = None,
+        format:str = None,
+        stack_info:bool = None,
+        stacklevel:int = None,
+        extra_labels:map = {},
+    ):
 
-from .formatter import JsonFormatter
+    if None in (level, format, stack_info, stacklevel):
+        cfg = get_config('log')
 
+        if level is None:
+            level = cfg['level'].upper()
+        if format is None:
+            format = cfg['format']
+        if stacklevel is None:
+            stacklevel = cfg['stacklevel']
+        if stack_info is None:
+            stack_info = cfg['stackinfo']
+
+    logging.root.setLevel(level)
+
+    logger = GCPLogger(name, format=format, stack_info=stack_info, stacklevel=stacklevel, extra_labels=extra_labels)
+    logger.setLevel(level)
+
+    return logger
 
 def _resolve(name):
-    import importlib
     """Resolve a dotted name to a global object."""
     name = name.split('.')
     used = name.pop(0)
@@ -20,32 +47,42 @@ def _resolve(name):
         except AttributeError:
             found = importlib.import_module(used)
     return found
-
-
 log_config._resolve = _resolve
 
-LOG_LEVEL = logging.DEBUG if os.environ.get("DEBUG", "false").lower() in ['true', '1'] else logging.INFO
 
-try:
-    file = os.environ.get('LOG_CONFIG', resource_filename(__name__, 'logger.conf'))
-    log_config.fileConfig(file)
-except Exception:
-    print('Couldn\'t load default configuration data. Something went wrong with the '
-          'installation.')
-    import traceback
-    import sys
+def except_logging(exc_type, exc_value, exc_traceback):
+    """
+    Log uncaught exceptions using the root logger. This is a function meant to
+    be set as `sys.excepthook` to provide unified logging for regular logs and
+    uncaught exceptions.
+    """
+    logging.error("Uncaught exception",
+                  exc_info=(exc_type, exc_value, exc_traceback))
+sys.excepthook = except_logging
 
-    exc_info = sys.exc_info()
-    traceback.print_exception(*exc_info)
-    del exc_info
-    sys.exit(1)
+def unraisable_logging(args):
+    """
+    Log unraisable exceptions using the root logger. This is a function meant
+    to be set as `sys.unraisablehook` to provide unified logging for regular
+    logs and unraisable exceptions.
+    """
+    exc_type, exc_value, exc_traceback, err_msg, _ = args
+    default_msg = "Unraisable exception"
+
+    logging.error(err_msg or default_msg,
+                  exc_info=(exc_type, exc_value, exc_traceback))
+
+sys.unraisablehook = unraisable_logging
 
 
-def get_logger(name=None):
-    logger = logging.getLogger(name)
-    logger.setLevel(LOG_LEVEL)
-    return logger
+def threading_except_logging(args):
+    """
+    Log uncaught exceptions from different threads using the root logger. This
+    is a function meant to be set as `threading.excepthook` to provide unified
+    logging for regular logs and uncaught exceptions from different threads.
+    """
+    exc_type, exc_value, exc_traceback, _ = args
+    logging.error("Uncaught threading exception",
+                  exc_info=(exc_type, exc_value, exc_traceback))
 
-
-sql_logger = get_logger('aiohttp_boilerplate.sql')
-view_logger = get_logger('aiohttp_boilerplate.views')
+threading.excepthook = threading_except_logging

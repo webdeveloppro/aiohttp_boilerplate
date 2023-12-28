@@ -29,11 +29,10 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/webdeveloppro/aiohttp_boilerplate',
     classifiers=[
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.11',
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     package_data={
-        'logging': ['config.yaml'],
     }
 )

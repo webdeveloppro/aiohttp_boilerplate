@@ -1,9 +1,10 @@
 import re
+import traceback
 
-from aiohttp_boilerplate.config import config
-from aiohttp_boilerplate.logging import sql_logger
+from aiohttp_boilerplate.sql.exceptions import log
 from aiohttp_boilerplate.sql import consts
 
+CUSTOM_TRACE = 5
 
 class SQLException(Exception):
     pass
@@ -11,12 +12,11 @@ class SQLException(Exception):
 
 class SQL(object):
 
-    def __init__(self, table, db_pool=None, logger=sql_logger):
+    def __init__(self, table, db_pool=None):
         self.db_pool = db_pool
         self.table = table
         self.query = ''
         self.params = {}
-        self.logger = logger
         self.conn = None
 
     def __str__(self) -> str:
@@ -31,9 +31,9 @@ class SQL(object):
         if self.conn is None:
             try:
                 self.conn = await self.db_pool.acquire()
-            except Exception as e:
-                self.logger.error(f'db pool lost connection')
-                raise e
+            except Exception as exp:
+                log.error('db pool lost connection')
+                raise exp
         return self.conn
 
     def prepare_where(self, where: str, params: dict, index: int = 0) -> str:
@@ -54,11 +54,12 @@ class SQL(object):
 
     async def execute(self, query, params, fetch_method=consts.EXECUTE):
         self.query = query
-        self.params = params
+        self.params = {}
+        self.params.update(params)
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             if fetch_method == consts.EXECUTE:
@@ -74,7 +75,9 @@ class SQL(object):
 
         return result
 
-    async def select(self, fields='*', join='', where='', order='', limit='', offset=None, params=None, many=False):
+    async def select(self,
+        fields='*', join='', where='', order='', limit='', offset=None, params=None, many=False
+    ):
         params = params or {}
 
         if self.table is None:
@@ -83,8 +86,8 @@ class SQL(object):
         if type(params) != dict:
             raise SQLException('params have to be dict')
 
-        self.params = params
-        # FIXME
+        self.params = {}
+        self.params.update(params)
         self.query = 'select {} from {}'.format(fields, self.table)  # nosec
 
         if join:
@@ -107,11 +110,10 @@ class SQL(object):
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
-        if config.get('TRACEBACK', 0) > 0:
-            import traceback
-            self.logger.warning('\n'.join([str(line) for line in traceback.extract_stack()]))
+        if log.level == CUSTOM_TRACE:
+            log.warning('\n'.join([str(line) for line in traceback.extract_stack()]))
 
         try:
             stmt = await self.conn.prepare(self.query)
@@ -124,22 +126,24 @@ class SQL(object):
 
         return result
 
-    async def insert(self, data: dict) -> int:
+    async def insert(self, data: dict) -> dict:
         on_conflict = data.pop('__on_conflict', '')
-        self.query = 'insert into {}({}) values({}) {} RETURNING id'.format(
+        returning = data.pop('__returning', '*')
+        self.query = 'insert into {}({}) values({}) {} RETURNING {}'.format(
             self.table,
             ','.join(data.keys()),
             ','.join(['$%d' % (x + 1) for x in range(0, data.__len__())]),
-            on_conflict
+            on_conflict,
+            returning,
         )
         # self.params = self._prepare_fields(params)
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, data.values())
+        log.debug('query: %s, values: %s', self.query, data.values())
 
         try:
-            result = await self.conn.fetchval(self.query, *data.values())
+            result = await self.conn.fetchrow(self.query, *data.values())
         finally:
             await self.release()
 
@@ -154,13 +158,14 @@ class SQL(object):
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params, len(data)))
 
-        self.params = data
+        self.params = {}
+        self.params.update(data)
         self.params.update(params)
         # self.params = self._prepare_fields(self.params)
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.execute(self.query, *self.params.values())
@@ -176,11 +181,12 @@ class SQL(object):
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params))
 
-        self.params = params
+        self.params = {}
+        self.params.update(params)
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.execute(self.query, *params.values())
@@ -196,11 +202,12 @@ class SQL(object):
         if where:
             self.query += ' where {}'.format(self.prepare_where(where, params))
 
-        self.params = params
+        self.params = {}
+        self.params.update(params)
 
         await self.get_connection()
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.fetchval(self.query, *params.values())
@@ -219,9 +226,10 @@ class SQL(object):
         )
 
         self.query = query
-        self.params = params
+        self.params = {}
+        self.params.update(params)
 
-        self.logger.debug(f'query: %s, values: %s', self.query, self.params.values())
+        log.debug('query: %s, values: %s', self.query, self.params.values())
 
         try:
             result = await self.conn.fetchval(self.query, *self.params.values())

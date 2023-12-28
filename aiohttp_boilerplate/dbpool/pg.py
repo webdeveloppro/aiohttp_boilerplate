@@ -29,14 +29,14 @@ async def setup_connection(conn):
     )
 
 
-async def create_connection(conf, loop=None):
+async def create_connection(conf, loop):
 
     return await asyncpg.connect(
         **conf,
         loop=loop
     )
 
-async def create_pool(conf, loop=None):
+async def create_pool(conf, loop):
 
     return await asyncpg.create_pool(
         **conf,

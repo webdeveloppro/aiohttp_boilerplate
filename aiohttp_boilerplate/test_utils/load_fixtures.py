@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 
 
 class LoadFixture:
@@ -46,13 +47,18 @@ class LoadFixture:
 
             self.table = t
 
+    async def truncate(self, con):
+        ''' Truncate table and cascade tables '''
+        await con.execute(f"TRUNCATE {self.table} CASCADE")
+
+
     async def file2db(self, con):
         ''' Read data from file and save in the data array '''
         filename = self.directory + '/' + self.file
 
         self.data = json.loads(open(filename, 'r').read())
 
-        await con.execute("TRUNCATE {} CASCADE".format(self.table))
+        await con.execute(f"DELETE FROM {self.table}; select setval('{self.table}_id_seq',(select max(id) from {self.table}));")
 
         for row in self.data:
             field_names = []
@@ -71,12 +77,13 @@ class LoadFixture:
             )
             stmt = await con.prepare(sql)
 
-            # analyze sql fields
-            if 'approved_date' in row.keys():
-                row['approved_date'] = datetime.datetime.fromtimestamp(row['approved_date'])
-                row['closing_date'] = datetime.datetime.fromtimestamp(row['closing_date'])
-            if 'publication_date' in row.keys():
-                row['publication_date'] = datetime.datetime.fromtimestamp(row['publication_date'])
-            if 'last_login' in row.keys():
-                row['last_login'] = datetime.datetime.fromisoformat(row['last_login'])
+            # hack to convert strings to dates, expecting dates in iso format "2022-12-29T20:36:42.611271+00:00"
+            number_pattern = "\\d{4}-\\d{2}-\\d{2}T\\d{2}.*"
+            for key in row.keys():
+                val = row[key]
+                if isinstance(val, str) and re.match(number_pattern, val) is not None:
+                    row[key] = datetime.datetime.fromisoformat(val)
             await stmt.fetch(*row.values())
+
+        # Fix auto increments after
+        await con.execute(f"select setval('{self.table}_id_seq', (select max(id) from {self.table}))")

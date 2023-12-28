@@ -1,7 +1,8 @@
+import logging
 from aiohttp import web
 
 from .options import ObjectView
-from .exceptions import JSONHTTPError
+from .exceptions import JSONHTTPError, log
 
 
 class RetrieveView(ObjectView):
@@ -22,10 +23,14 @@ class RetrieveView(ObjectView):
 
     # Perform database select request
     async def perform_get(self, fields="*", **kwargs):
+        self.request.log.debug(f"fields=${fields}, kwargs: ${kwargs}")
         aliases, fields = self.join_prepare_fields(fields)
         # id is required for single object
         if fields.rfind("t0.id") == -1:
             fields += ",t0.id as t0__id"
+        # ToDo
+        # Separate views -> models -> sql
+        # So do self.obj.select() and select invoke sql
         raw_data = await self.obj.sql.select(fields=fields, **kwargs)
         self.obj.set_data(self.join_beautiful_output(aliases, raw_data))
 
@@ -50,4 +55,21 @@ class RetrieveView(ObjectView):
         return await self.get_data(self.obj)
 
     async def get(self):
-        return self.json_response(await self._get())
+        self.request.log.debug('%s %s', self.request.method, str(self.request.url))
+        try:
+            return self.json_response(await self._get())
+        except Exception as err:
+            # show any 4xx errors directly
+            if hasattr(err, 'status_code'):
+                if err.status_code >= 400 and err.status_code < 500:
+                    raise err
+
+            self.request.log.error(err, exc_info=True)
+            err_msg = 'HTTP Internal Server Error'
+
+            if log.level == logging.DEBUG:
+                err_msg = str(err)
+
+            raise JSONHTTPError(
+                {'error': err_msg}, web.HTTPInternalServerError
+            ) from err

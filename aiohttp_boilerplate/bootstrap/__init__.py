@@ -1,13 +1,18 @@
 import asyncio
+
+try:
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ModuleNotFoundError:
+    pass
+
 import logging
-import sys
-import uvloop
+from pythonjsonlogger import jsonlogger
 
 from aiohttp import web
-from asyncpg.exceptions import PostgresError
 from aiohttp_boilerplate import config
 from aiohttp_boilerplate.dbpool import pg as db
-from pathlib import Path
+
 
 from .console_app import start_console_app
 from .web_app import start_web_app
@@ -15,39 +20,14 @@ from .web_app import start_web_app
 __all__ = ('web_app', 'console_app', 'get_loop',)
 
 
-def get_loop():
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-    loop = asyncio.get_event_loop()
-    return loop
-
-
-async def migration_sql(db_pool, conf, path_to_file):
-    logger = logging.getLogger('sql.migration')
-
-    file = Path(path_to_file)
-
-    if file.exists():
-        with file.open() as f:
-            logger.debug('Read file {}'.format(path_to_file))
-            sql_query = f.read()
-            if sql_query:
-                async with db_pool.acquire() as conn:
-                    async with conn.transaction():
-                        logger.info("Making migration...")
-                        try:
-                            await conn.execute(sql_query)
-                            logger.info('Successfully applied migration from sql/migrations.sql')
-                        except PostgresError as e:
-                            logger.error(f"Migration failed {e}")
-    else:
-        logger.error('file {} does not exist'.format(path_to_file))
+def get_loop() -> asyncio.AbstractEventLoop:
+    return asyncio.get_event_loop()
 
 def console_app(loop=None):
     if loop is None:
         loop = get_loop()
 
-    conf = loop.run_until_complete(config.load_config(loop=loop))
+    conf = loop.run_until_complete(config.load_config())
     db_pool = loop.run_until_complete(db.create_pool(
         loop=loop,
         conf=conf['postgres']
@@ -57,16 +37,31 @@ def console_app(loop=None):
 
 def web_app():
     loop = get_loop()
-    conf = loop.run_until_complete(config.load_config(loop=loop))
+    conf = loop.run_until_complete(config.load_config())
+
+    setup_global_logger(conf['log']['format'], conf['log']['level'])
+
     db_pool = loop.run_until_complete(db.create_pool(
         conf=conf['postgres'],
         loop=loop,
     ))
 
-    if 'migrate' in sys.argv:
-        file_to_path = sys.argv.pop()
-        loop.run_until_complete(migration_sql(db_pool, conf, file_to_path))
-        return
-
     app = start_web_app(conf, db_pool, loop)
-    web.run_app(app, **conf['web_run'])
+    runner = web.AppRunner(app)
+    # runner._kwargs["_cls"] = Request
+    loop.run_until_complete(runner.setup())
+    site = web.TCPSite(runner, host=conf['web_run']['host'], port=conf['web_run']['port'])
+    loop.run_until_complete(site.start())
+    loop.run_forever()
+
+def setup_global_logger(format, level):
+    if format == 'json':
+        logger = logging.getLogger()
+
+        logHandler = logging.StreamHandler()
+        formatter = jsonlogger.JsonFormatter()
+        logHandler.setFormatter(formatter)
+        logger.handlers = []
+        logger.addHandler(logHandler)
+    
+    logger.setLevel(level.upper())

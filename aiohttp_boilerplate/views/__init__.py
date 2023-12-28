@@ -1,16 +1,15 @@
 import datetime
 import decimal
 import json
-import sys
 import types
 from functools import partial
 
 from .exceptions import JSONHTTPError
-
+from .request import Context
 
 # JSON serialization tuning
-# Fix for datetime, decimal, memoryview and bytes type
 def fix_json(obj):
+    from .. import models
     if isinstance(obj, decimal.Decimal):
         return float(obj)
     # ToDo
@@ -24,8 +23,11 @@ def fix_json(obj):
         return bytes(obj)
     if isinstance(obj, types.MethodType):
         return obj()
-    print('unknown type: ', type(obj), obj, file=sys.stderr)
-    raise TypeError
+    if isinstance(obj, models.Manager):
+        return obj.data
+    raise TypeError('unknown type: ', type(obj), obj)
 
 
 fixed_dump = partial(json.dumps, indent=None, default=fix_json)
+
+__all__ = ('JSONHTTPError', 'Context', 'fixed_dump', )
