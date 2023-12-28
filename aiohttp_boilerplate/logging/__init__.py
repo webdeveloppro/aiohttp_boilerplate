@@ -20,7 +20,7 @@ def get_logger(
         cfg = get_config('log')
 
         if level is None:
-            level = cfg['level']
+            level = cfg['level'].upper()
         if format is None:
             format = cfg['format']
         if stacklevel is None:

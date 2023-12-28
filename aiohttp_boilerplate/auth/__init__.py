@@ -4,11 +4,13 @@ import aiohttp
 import jwt
 import ujson
 
-from aiohttp_boilerplate.config import config
+from aiohttp_boilerplate import config
 from aiohttp_boilerplate.views.exceptions import JSONHTTPError
+
 
 async def validate_token(headers: dict) -> Mapping:
     async with aiohttp.ClientSession(json_serialize=ujson, headers=headers) as session:
+        cfg = await config.load_config()
         async with session.get(config['AUTH_URL']) as resp:
             if resp.status != 204 and resp.status != 200:
                 raise JSONHTTPError(
