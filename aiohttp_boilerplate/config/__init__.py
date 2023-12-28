@@ -64,7 +64,6 @@ async def load_config():
     try:
         app_dir_config = importlib.import_module(f"{config['app_dir']}.config")
         config.update(app_dir_config.config)
-        config.update(APP.config)
     except ModuleNotFoundError:
         pass
     
