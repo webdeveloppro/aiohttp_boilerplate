@@ -4,19 +4,35 @@ import os
 import sys
 import threading
 from logging import config as log_config
+from .helpers import GCPLogger
+from aiohttp_boilerplate.config import get_config
 
-DEFAULT_LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+def get_logger(
+        name:str,
+        level:str = None,
+        format:str = None,
+        stack_info:bool = None,
+        stacklevel:int = None,
+        extra_labels:map = {},
+    ):
 
-logging.basicConfig()
-logging.root.setLevel(DEFAULT_LOG_LEVEL)
+    if None in (level, format, stack_info, stacklevel):
+        cfg = get_config('log')
 
+        if level is None:
+            level = cfg['level']
+        if format is None:
+            format = cfg['format']
+        if stacklevel is None:
+            stacklevel = cfg['stacklevel']
+        if stack_info is None:
+            stack_info = cfg['stackinfo']
 
-def get_logger(name:str, level:str = None):
-    """create logger"""
-    if level is None:
-        level = DEFAULT_LOG_LEVEL
-    logger = logging.getLogger(name)
+    logging.root.setLevel(level)
+
+    logger = GCPLogger(name, format=format, stack_info=stack_info, stacklevel=stacklevel, extra_labels=extra_labels)
     logger.setLevel(level)
+
     return logger
 
 def _resolve(name):
