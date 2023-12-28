@@ -10,6 +10,5 @@ async def logger_to_request(request:web.Request, handler):
 
     request.log = log
     response = await handler(request)
-    if request.raw_path != '/healthcheck':
-        log.setResponse(response)
+    log.setResponse(response)
     return response

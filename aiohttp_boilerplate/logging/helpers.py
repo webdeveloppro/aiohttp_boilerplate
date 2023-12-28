@@ -5,9 +5,6 @@ from aiohttp.web_response import StreamResponse
 from pythonjsonlogger import jsonlogger
 from datetime import datetime
 
-# logging.basicConfig(
-#     datefmt='%Y-%m-%d %H:%M:%S'
-# )
 
 GCPSeverityMap = {
 	logging.DEBUG: "DEBUG",
@@ -40,7 +37,6 @@ class GCPLogger(logging.Logger):
             logHandler.setFormatter(formatter)
             self.addHandler(logHandler)
 
-        self.addFilter(self.skipHealtcheck)
         # self.addFilter(self.add_extra)
             
     def new_component_logger(self, name):
@@ -61,12 +57,6 @@ class GCPLogger(logging.Logger):
 
     def setComponent(self, component: str):
         self.component = component
-
-    def skipHealtcheck(self, record) -> bool:
-        # Do not log healthcheck requests
-        if self.request and str(self.request.rel_url) == "/healthcheck":
-            return False
-        return True
     
     def addExtra(self, record, level, *args):
         # list of available keys for google cloud
@@ -110,6 +100,7 @@ class GCPLogger(logging.Logger):
 
     def _log(self, level, msg, args, exc_info=None, extra=None, stack_info=None,
              stacklevel=None):
+        
         if stack_info is None:
             stack_info = self.default_stack_info
 

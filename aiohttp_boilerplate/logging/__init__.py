@@ -7,6 +7,9 @@ from logging import config as log_config
 from .helpers import GCPLogger
 from aiohttp_boilerplate.config import get_config
 
+def skipHealtcheck(record) -> bool:
+    return record.getMessage().find("/healtcheck") == -1
+
 def get_logger(
         name:str,
         level:str = None,

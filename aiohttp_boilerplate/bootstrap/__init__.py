@@ -10,6 +10,7 @@ import logging
 from pythonjsonlogger import jsonlogger
 
 from aiohttp import web
+from aiohttp_boilerplate import logging as blogging
 from aiohttp_boilerplate import config
 from aiohttp_boilerplate.dbpool import pg as db
 
@@ -46,6 +47,8 @@ def web_app():
         loop=loop,
     ))
 
+    logging.getLogger("aiohttp.access").addFilter(blogging.skipHealtcheck)
+
     app = start_web_app(conf, db_pool, loop)
     runner = web.AppRunner(app)
     # runner._kwargs["_cls"] = Request
@@ -64,4 +67,4 @@ def setup_global_logger(format, level):
         logger.handlers = []
         logger.addHandler(logHandler)
     
-    logger.setLevel(level.upper())
+        logger.setLevel(level.upper())
