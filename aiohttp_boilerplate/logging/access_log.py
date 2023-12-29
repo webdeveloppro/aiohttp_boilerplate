@@ -2,12 +2,12 @@ import logging
 from aiohttp.abc import AbstractAccessLogger
 
 def skipHealtcheck(record) -> bool:
-    return record.serviceContext["httpRequest"]["path"] == "/healtcheckd"
+    return record.serviceContext["httpRequest"]["path"] == "/healthcheck"
 
 class AccessLoggerRequestResponse(AbstractAccessLogger):
     def __init__(self, logger: logging.Logger, log_format: str) -> None:
         super().__init__(logger, log_format=log_format)
-        # self.logger.addFilter(skipHealtcheck)
+        self.logger.addFilter(skipHealtcheck)
 
     def log(self, request, response, time):
         message = {
