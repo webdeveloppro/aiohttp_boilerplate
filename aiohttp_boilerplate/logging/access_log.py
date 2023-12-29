@@ -20,7 +20,6 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
         headers['query'] = dict(request.query)
         headers['scheme'] = request.scheme
         
-        print('for each headers', headers)
         message = {
             "http_request": {
                 "headers": headers,
