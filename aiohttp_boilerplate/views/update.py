@@ -95,7 +95,6 @@ class UpdateView(ObjectView):
         return await self.patch()
 
     async def patch(self):
-        self.request.log.debug('%s %s', self.request.method, str(self.request.url))
         try:
             return await self._patch()
         except Exception as err:

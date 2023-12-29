@@ -7,13 +7,12 @@ except ModuleNotFoundError:
     pass
 
 import logging
-from pythonjsonlogger import jsonlogger
+
 
 from aiohttp import web
 from aiohttp_boilerplate import config
 from aiohttp_boilerplate.dbpool import pg as db
-from aiohttp_boilerplate.logging import access_log, gcp_logger
-
+from aiohttp_boilerplate import logging as blogging
 
 from .console_app import start_console_app
 from .web_app import start_web_app
@@ -40,7 +39,7 @@ def web_app():
     loop = get_loop()
     conf = loop.run_until_complete(config.load_config())
 
-    setup_global_logger(conf['log']['format'], conf['log']['level'])
+    blogging.setup_global_logger(conf['log']['format'], conf['log']['level'])
 
     db_pool = loop.run_until_complete(db.create_pool(
         conf=conf['postgres'],
@@ -48,22 +47,8 @@ def web_app():
     ))
 
     app = start_web_app(conf, db_pool, loop)
-    runner = web.AppRunner(app, access_log_class=access_log.AccessLoggerRequestResponse)
-    # runner._kwargs["_cls"] = Request
+    runner = web.AppRunner(app, access_log_class=blogging.access_log.AccessLoggerRequestResponse)
     loop.run_until_complete(runner.setup())
     site = web.TCPSite(runner, host=conf['web_run']['host'], port=conf['web_run']['port'])
     loop.run_until_complete(site.start())
     loop.run_forever()
-
-def setup_global_logger(format, level):
-    logging.setLoggerClass(gcp_logger.GCPLogger)
-    logger = logging.getLogger()
-    logHandler = logging.StreamHandler()
-    logger.handlers = []
-
-    if format == 'json':
-        formatter = jsonlogger.JsonFormatter()
-        logHandler.setFormatter(formatter)
-
-    logger.addHandler(logHandler)
-    logger.setLevel(level.upper())

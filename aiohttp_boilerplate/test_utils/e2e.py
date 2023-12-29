@@ -6,6 +6,7 @@ from .load_fixtures import LoadFixture
 from aiohttp_boilerplate import config
 from aiohttp_boilerplate.bootstrap import start_web_app
 from aiohttp_boilerplate.dbpool import pg as db
+from aiohttp_boilerplate import logging as blogging
 
 
 class E2ETestCase(UnitTestCase):
@@ -25,6 +26,7 @@ class E2ETestCase(UnitTestCase):
             conf=conf['postgres'],
             loop=self.loop,
         )
+        blogging.setup_global_logger(conf['log']['format'], conf['log']['level'])
 
         app = start_web_app(
             conf=conf,

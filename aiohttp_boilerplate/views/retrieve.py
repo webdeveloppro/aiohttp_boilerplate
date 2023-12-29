@@ -55,7 +55,6 @@ class RetrieveView(ObjectView):
         return await self.get_data(self.obj)
 
     async def get(self):
-        self.request.log.debug('%s %s', self.request.method, str(self.request.url))
         try:
             return self.json_response(await self._get())
         except Exception as err:
