@@ -4,11 +4,9 @@ import os
 import sys
 import threading
 from logging import config as log_config
-from .helpers import GCPLogger
+from .gcp_logger import GCPLogger
 from aiohttp_boilerplate.config import get_config
 
-def skipHealtcheck(record) -> bool:
-    return record.getMessage().find("/healtcheck") == -1
 
 def get_logger(
         name:str,
