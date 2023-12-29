@@ -42,8 +42,8 @@ def get_config(name=None):
             'aiohttp_boilerplate.middleware.defaults.cross_origin_rules',
             'aiohttp_boilerplate.middleware.defaults.url_status_200',
             'aiohttp_boilerplate.middleware.defaults.erase_header_server',
-            'aiohttp_boilerplate.middleware.logger_to_request.logger_to_request',
             'aiohttp_boilerplate.middleware.x_request_id.x_request_id',
+            'aiohttp_boilerplate.middleware.logger_to_request.logger_to_request',
         ]
     }
 

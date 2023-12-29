@@ -12,7 +12,7 @@ from pythonjsonlogger import jsonlogger
 from aiohttp import web
 from aiohttp_boilerplate import config
 from aiohttp_boilerplate.dbpool import pg as db
-from aiohttp_boilerplate.logging import access_log
+from aiohttp_boilerplate.logging import access_log, gcp_logger
 
 
 from .console_app import start_console_app
@@ -56,13 +56,14 @@ def web_app():
     loop.run_forever()
 
 def setup_global_logger(format, level):
-    if format == 'json':
-        logger = logging.getLogger()
+    logging.setLoggerClass(gcp_logger.GCPLogger)
+    logger = logging.getLogger()
+    logHandler = logging.StreamHandler()
+    logger.handlers = []
 
-        logHandler = logging.StreamHandler()
+    if format == 'json':
         formatter = jsonlogger.JsonFormatter()
         logHandler.setFormatter(formatter)
-        logger.handlers = []
-        logger.addHandler(logHandler)
-    
-        logger.setLevel(level.upper())
+
+    logger.addHandler(logHandler)
+    logger.setLevel(level.upper())

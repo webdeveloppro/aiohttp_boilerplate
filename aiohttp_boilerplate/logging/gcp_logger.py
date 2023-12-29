@@ -30,13 +30,13 @@ class GCPLogger(logging.Logger):
         self.default_stack_info = stack_info
         self.default_stacklevel = stacklevel
         self.extra = extra_labels
+        logHandler = logging.StreamHandler()
 
         if format == "json":
-            logHandler = logging.StreamHandler()
             formatter = jsonlogger.JsonFormatter()
             logHandler.setFormatter(formatter)
-            self.addHandler(logHandler)
 
+        self.addHandler(logHandler)
         # self.addFilter(self.add_extra)
             
     def new_component_logger(self, name):
@@ -79,7 +79,7 @@ class GCPLogger(logging.Logger):
             extra["serviceContext"]["httpRequest"] = {
                 "method": self.request.method,
                 "url": self.request.path_qs,
-                "userAgent": self.request.headers.get("userAgent", ""),
+                "userAgent": self.request.headers.get("User-Agent", ""),
                 "referer": self.request.headers.get("referer", ""),
                 # "status": "",
                 "remoteIp": self.request.remote,
