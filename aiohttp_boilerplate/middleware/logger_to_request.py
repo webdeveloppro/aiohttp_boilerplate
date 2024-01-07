@@ -1,5 +1,10 @@
 import logging
 from aiohttp import web
+from pythonjsonlogger import jsonlogger
+
+from aiohttp_boilerplate import config
+from aiohttp_boilerplate.logging import formatters
+
 
 # Create logger in request with all info
 @web.middleware

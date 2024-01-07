@@ -5,6 +5,9 @@ from aiohttp.web_response import StreamResponse
 from pythonjsonlogger import jsonlogger
 from datetime import datetime
 
+from aiohttp_boilerplate import config
+from . import formatters
+
 
 GCPSeverityMap = {
 	logging.DEBUG: "DEBUG",
@@ -19,7 +22,7 @@ class GCPLogger(logging.Logger):
     response: StreamResponse
     component: str
 
-    def __init__(self, *args, format='json', stack_info=False, stacklevel=3, extra_labels={}, **kwargs):
+    def __init__(self, *args, format=None, stack_info=False, stacklevel=3, extra_labels={}, **kwargs):
         super().__init__(*args, **kwargs)
         self.component = ""
         if len(args) > 0:
@@ -32,8 +35,19 @@ class GCPLogger(logging.Logger):
         self.extra = extra_labels
         logHandler = logging.StreamHandler()
 
+        # Only json, colored or txt format is allowed
+        # Output format is hardcoded
+        if format is None or format != "json" or format != "colored":
+            format = config.conf['log']['format']
+
         if format == "json":
             formatter = jsonlogger.JsonFormatter()
+            logHandler.setFormatter(formatter)
+        if format == "colored":
+            formatter = formatters.ColoredFormatter(formatters.DEFAULT_MSG_FORMAT)
+            logHandler.setFormatter(formatter)
+        else:
+            formatter = formatters.TxtFormatter(formatters.DEFAULT_MSG_FORMAT)
             logHandler.setFormatter(formatter)
 
         self.addHandler(logHandler)

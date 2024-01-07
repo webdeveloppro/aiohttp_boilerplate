@@ -23,7 +23,6 @@ class RetrieveView(ObjectView):
 
     # Perform database select request
     async def perform_get(self, fields="*", **kwargs):
-        self.request.log.debug("Perform database query", f"fields=${fields}, kwargs: ${str(kwargs)}")
         aliases, fields = self.join_prepare_fields(fields)
         # id is required for single object
         if fields.rfind("t0.id") == -1:

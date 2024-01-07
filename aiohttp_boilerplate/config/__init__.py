@@ -16,7 +16,6 @@ def get_config(name=None):
             'web_run': {
                 'host': env.str('HOST'),
                 'port': env.int('PORT'),
-                'access_log_class': None,
             },
             'log': {
                 'level': env.str('LOG_LEVEL'),

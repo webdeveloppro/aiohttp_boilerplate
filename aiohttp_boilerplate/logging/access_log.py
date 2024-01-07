@@ -1,8 +1,14 @@
+import asyncio
 import logging
+
+from datetime import datetime
+
 from pythonjsonlogger import jsonlogger
 from aiohttp.abc import AbstractAccessLogger
+from aiohttp_boilerplate import config
+
 from .gcp_logger import GCPSeverityMap
-from datetime import datetime
+from . import formatters
 
 # Return true if you need write given request to access logs
 def filerRequestsLogs(record) -> bool:
@@ -14,9 +20,17 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
         self.logger.addFilter(filerRequestsLogs)
         self.logger.setLevel(logging.DEBUG)
 
+        log_type = config.conf['log']['format']
         logHandler = logging.StreamHandler()
-        formatter = jsonlogger.JsonFormatter()
-        logHandler.setFormatter(formatter)
+        if log_type == "json":
+            formatter = jsonlogger.JsonFormatter()
+            logHandler.setFormatter(formatter)
+        if log_type == "colored":
+            formatter = formatters.ColoredFormatter(formatters.DEFAULT_MSG_FORMAT)
+            logHandler.setFormatter(formatter)
+        else:
+            formatter = formatters.TxtFormatter(formatters.DEFAULT_MSG_FORMAT)
+            logHandler.setFormatter(formatter)
 
         self.logger.addHandler(logHandler)
 
