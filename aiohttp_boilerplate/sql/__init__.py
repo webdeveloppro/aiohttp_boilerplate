@@ -59,7 +59,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('query: %s, values: %s', self.query, self.params.values())
+        log.info('Start database sql', f'{self.query} values={str(self.params.values())}')
 
         try:
             if fetch_method == consts.EXECUTE:
@@ -110,7 +110,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('query: %s, values: %s', self.query, self.params.values())
+        log.info('Start database sql', f'{self.query} values={str(self.params.values())}', extra={"sql_type": "select"})
 
         if log.level == CUSTOM_TRACE:
             log.warning('\n'.join([str(line) for line in traceback.extract_stack()]))
@@ -140,7 +140,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('query: %s, values: %s', self.query, data.values())
+        log.info('Start database sql', f'{self.query} values={str(self.params.values())}', extra={"sql_type": "insert"})
 
         try:
             result = await self.conn.fetchrow(self.query, *data.values())
@@ -165,7 +165,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('query: %s, values: %s', self.query, self.params.values())
+        log.info('Start database sql', f'{self.query} values={str(self.params.values())}', extra={"sql_type": "update"})
 
         try:
             result = await self.conn.execute(self.query, *self.params.values())
@@ -186,7 +186,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('query: %s, values: %s', self.query, self.params.values())
+        log.info('Start database sql', f'{self.query} values={str(self.params.values())}', extra={"sql_type": "delete"})
 
         try:
             result = await self.conn.execute(self.query, *params.values())
@@ -207,7 +207,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('query: %s, values: %s', self.query, self.params.values())
+        log.info('Start database sql', f'{self.query} values={str(self.params.values())}', extra={"sql_type": "get_count"})
 
         try:
             result = await self.conn.fetchval(self.query, *params.values())
@@ -229,7 +229,7 @@ class SQL(object):
         self.params = {}
         self.params.update(params)
 
-        log.debug('query: %s, values: %s', self.query, self.params.values())
+        log.info('Start database sql', f'{self.query} values={str(self.params.values())}', extra={"sql_type": "is_exists"})
 
         try:
             result = await self.conn.fetchval(self.query, *self.params.values())

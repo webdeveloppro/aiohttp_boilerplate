@@ -1,17 +1,27 @@
 import logging
+from pythonjsonlogger import jsonlogger
 from aiohttp.abc import AbstractAccessLogger
+from .gcp_logger import GCPSeverityMap
 
-def skipHealtcheck(record) -> bool:
-    return record.serviceContext["httpRequest"]["path"] == "/healthcheck"
+def skipLogRequest(record) -> bool:
+    return record.serviceContext["httpRequest"]["path"] not in ("/healthcheck", "/metrics")
 
 class AccessLoggerRequestResponse(AbstractAccessLogger):
     def __init__(self, logger: logging.Logger, log_format: str) -> None:
         super().__init__(logger, log_format=log_format)
-        self.logger.addFilter(skipHealtcheck)
+        self.logger.addFilter(skipLogRequest)
+        self.logger.setLevel(logging.DEBUG)
+
+        logHandler = logging.StreamHandler()
+        formatter = jsonlogger.JsonFormatter()
+        logHandler.setFormatter(formatter)
+
+        self.logger.addHandler(logHandler)
 
     def log(self, request, response, time):
         message = {
             "component": "access-log",
+            "severity": GCPSeverityMap[logging.INFO],
             "serviceContext": {
                 "httpRequest": {
                     "method": request.method,
@@ -24,10 +34,9 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
                     "latency": time,
                     "protocol": request.scheme,
                 }
-            },
-            "json_fields": {}
+            }
         }
         if "context" in request:
             message["trace"] = request.context.request_id
             # message["json_fields"]["user"] = request.context.user.id
-        self.logger.debug('completed handling request', extra=message)
+        self.logger.info('completed handling request', extra=message)

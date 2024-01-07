@@ -4,7 +4,6 @@ import importlib
 import sys
 import threading
 from logging import config as log_config
-from pythonjsonlogger import jsonlogger
 from aiohttp_boilerplate.config import get_config
 
 from .gcp_logger import GCPLogger
