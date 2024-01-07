@@ -13,6 +13,7 @@ from aiohttp import web
 from aiohttp_boilerplate import config
 from aiohttp_boilerplate.dbpool import pg as db
 from aiohttp_boilerplate import logging as blogging
+from aiohttp_boilerplate.logging import access_log
 
 from .console_app import start_console_app
 from .web_app import start_web_app
@@ -47,7 +48,7 @@ def web_app():
     ))
 
     app = start_web_app(conf, db_pool, loop)
-    runner = web.AppRunner(app, access_log_class=blogging.access_log.AccessLoggerRequestResponse)
+    runner = web.AppRunner(app, access_log_class=access_log.AccessLoggerRequestResponse)
     loop.run_until_complete(runner.setup())
     site = web.TCPSite(runner, host=conf['web_run']['host'], port=conf['web_run']['port'])
     loop.run_until_complete(site.start())

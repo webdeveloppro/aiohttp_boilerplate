@@ -86,7 +86,7 @@ class ListView(RetrieveView):
         return beautiful_data
 
     async def perform_get(self, fields="", **kwargs):
-        self.request.log.debug(f"fields=${fields}, kwargs: ${kwargs}")
+        self.request.log.debug("Perform get request" f"fields=${fields}, kwargs: ${kwargs}")
         aliases, fields = self.join_prepare_fields(fields)
         raw_data = await self.objects.sql.select(
             fields=fields, many=True, **kwargs
@@ -94,7 +94,7 @@ class ListView(RetrieveView):
         self.objects.set_data(self.join_beautiful_output(aliases, raw_data))
 
     async def perform_get_count(self, where, params):
-        self.request.log.debug(f"where=${where}, params: ${params}")
+        self.request.log.debug("Perform get count", f"where=${where}, params: ${params}")
         return await self.objects.sql.get_count(where=where, params=params)
 
     async def get_count(self, where='', params=None):

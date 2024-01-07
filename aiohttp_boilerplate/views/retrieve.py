@@ -23,7 +23,7 @@ class RetrieveView(ObjectView):
 
     # Perform database select request
     async def perform_get(self, fields="*", **kwargs):
-        self.request.log.debug(f"fields=${fields}, kwargs: ${kwargs}")
+        self.request.log.debug("Perform database query", f"fields=${fields}, kwargs: ${str(kwargs)}")
         aliases, fields = self.join_prepare_fields(fields)
         # id is required for single object
         if fields.rfind("t0.id") == -1:
@@ -55,6 +55,7 @@ class RetrieveView(ObjectView):
         return await self.get_data(self.obj)
 
     async def get(self):
+        self.request.log.debug('Start process GET request')
         try:
             return self.json_response(await self._get())
         except Exception as err:
@@ -63,7 +64,7 @@ class RetrieveView(ObjectView):
                 if err.status_code >= 400 and err.status_code < 500:
                     raise err
 
-            self.request.log.error(err, exc_info=True)
+            self.request.log.error("Failed process GET request", err, exc_info=True)
             err_msg = 'HTTP Internal Server Error'
 
             if log.level == logging.DEBUG:

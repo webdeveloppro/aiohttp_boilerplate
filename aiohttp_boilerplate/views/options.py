@@ -16,7 +16,7 @@ class OptionsView(web.View):
     """
 
     def __init__(self, request):
-        request.log.debug(f"request=${request}")
+        request.log.debug("Init OptionsView")
         super().__init__(request)
         self.request_data = None
         self.app = self.request.app
@@ -31,7 +31,7 @@ class OptionsView(web.View):
 
     # Read data from request and save in request_data
     async def get_request_data(self, to_json=False):
-        self.request.log.debug(f"to_json=${to_json}")
+        self.request.log.debug(f"Read data from request and save in request_data to_json=${to_json}")
         if self.request_data is None:
             self.request_data = await self.request.text()
 
@@ -65,7 +65,7 @@ class SchemaOptionsView(OptionsView):
         self.schema = self.get_schema()
 
     def get_schema(self):
-        warnings.warn('Redefine get_schema in inherited class', RuntimeWarning)
+        self.request.log.warn('Redefine get_schema in inherited class', RuntimeWarning)
         return None
 
     async def get_schema_data(self, partial=False, schema=None):
@@ -269,7 +269,7 @@ class ObjectView(SchemaOptionsView):
 
     # Return context for and object
     async def get_data(self, obj):
-        self.request.log.debug(f"obj=${obj}")
+        self.request.log.debug("Start get_data method for ObjectView", str(obj.data))
 
         data = {}
         if self.schema:

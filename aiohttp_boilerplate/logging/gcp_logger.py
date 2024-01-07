@@ -37,7 +37,6 @@ class GCPLogger(logging.Logger):
             logHandler.setFormatter(formatter)
 
         self.addHandler(logHandler)
-        # self.addFilter(self.add_extra)
             
     def new_component_logger(self, name):
         copy_logger = GCPLogger(name)
@@ -58,17 +57,21 @@ class GCPLogger(logging.Logger):
     def setComponent(self, component: str):
         self.component = component
     
-    def addExtra(self, record, level, *args):
+    def addExtra(self, record, level, extra_args, *args):
         # list of available keys for google cloud
         # google/cloud/logging_v2/handlers/handlers.py,CloudLoggingFilter, func filter
         extra = {
             "component": self.name,
             "serviceContext": {
                 **self.extra,
+                **extra_args,
             },
         }
         if len(args) > 0:
-            extra["error"] = args[0]
+            if level > logging.INFO:
+                extra["error"] = args[0]
+            else:
+                extra["info"] = args[0]
         if self.context and self.context.request_id:
             extra["trace"] = self.context.request_id
         if self.context and self.context.user:
@@ -88,19 +91,15 @@ class GCPLogger(logging.Logger):
             }
             if self.response and self.response.code:
                 extra["serviceContext"]["httpRequest"]["responseStatusCode"] = self.response.code
-            # ToDo
-            # calculate latency
-            # extra["http_request"]["latency"] = ""
         
         # Add severity for GCP monitoring
         extra["severity"] = GCPSeverityMap[level]
-        extra["time"] = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        extra["time"] = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 
         return extra
 
     def _log(self, level, msg, args, exc_info=None, extra=None, stack_info=None,
              stacklevel=None):
-        
         if stack_info is None:
             stack_info = self.default_stack_info
 
@@ -110,6 +109,6 @@ class GCPLogger(logging.Logger):
         if extra is None:
             extra = {}
 
-        extra.update(self.addExtra(msg, level, *args))
+        extra = self.addExtra(msg, level, extra, *args)
         args = []
         return super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel)
