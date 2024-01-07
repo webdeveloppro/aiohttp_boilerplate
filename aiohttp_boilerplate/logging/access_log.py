@@ -3,7 +3,8 @@ from pythonjsonlogger import jsonlogger
 from aiohttp.abc import AbstractAccessLogger
 from .gcp_logger import GCPSeverityMap
 
-def skipLogRequest(record) -> bool:
+# Return true if you need write given request to access logs
+def filerRequestsLogs(record) -> bool:
     return record.serviceContext["httpRequest"]["path"] not in ("/healthcheck", "/metrics")
 
 class AccessLoggerRequestResponse(AbstractAccessLogger):
