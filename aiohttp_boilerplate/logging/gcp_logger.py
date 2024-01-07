@@ -91,27 +91,6 @@ class GCPLogger(logging.Logger):
             }
             if self.response and self.response.code:
                 extra["serviceContext"]["httpRequest"]["responseStatusCode"] = self.response.code
-
-        # Formatter for aiohttp access_logs https://docs.aiohttp.org/en/v3.7.4.post0/logging.html#access-logs
-        if self.component == "access_log":
-            extra["serviceContext"] = {}
-            first_request_line = extra_args.get("first_request_line", "").split()
-            
-            if len(first_request_line) >= 3:
-                extra["serviceContext"]["httpRequest"] = {
-                    "method": first_request_line[0],
-                    "url": first_request_line[1],
-                    "protocol": first_request_line[2],
-                    "userAgent": extra_args.get("request_header", {}).get("User-Agent", ""),
-                    "referer": extra_args.get("request_header", {}).get("Referer", ""),
-                    "remoteIp": extra_args.get("remote_address"),
-                    "response_status": extra_args.get("response_status"),
-                    "response_size": extra_args.get("response_size"),
-                    # ToDo
-                    # calculate latency
-                    # "request_latency": "",
-                    "request_start_time": extra_args.get("request_start_time"),
-                }
         
         # Add severity for GCP monitoring
         extra["severity"] = GCPSeverityMap[level]
