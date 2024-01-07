@@ -1,6 +1,6 @@
 import logging
 
-DEFAULT_MSG_FORMAT = "%(time)s - %(message)s"
+DEFAULT_MSG_FORMAT = "%(time)s - %(name)s - %(message)s"
 
 class TxtFormatter(logging.Formatter):
     def __init__(self, fmt, *args, **kwargs):
@@ -42,15 +42,14 @@ class ColoredFormatter(logging.Formatter):
         #    format += '%(serviceContext)'
         component = getattr(record, 'component', '')
         if component:
-            log_msg_format += ' %(component)s'
-        else:
-            log_msg_format += ' %(name)s'
+            log_msg_format = log_msg_format.replace('(name)s','(component)s')
+
         error_msg = getattr(record, 'error', '')
         if error_msg:
-            log_msg_format += ' %(error)s'
+            log_msg_format += ' - %(error)s'
         info_msg = getattr(record, 'info', '')
         if info_msg:
-            log_msg_format += ' %(info)s'
+            log_msg_format += ' - %(info)s'
         if record.exc_info:
             log_msg_format += ' %(exc_info)s'
         if record.exc_text:
