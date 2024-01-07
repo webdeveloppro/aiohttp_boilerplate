@@ -10,7 +10,7 @@ def filerRequestsLogs(record) -> bool:
 class AccessLoggerRequestResponse(AbstractAccessLogger):
     def __init__(self, logger: logging.Logger, log_format: str) -> None:
         super().__init__(logger, log_format=log_format)
-        self.logger.addFilter(skipLogRequest)
+        self.logger.addFilter(filerRequestsLogs)
         self.logger.setLevel(logging.DEBUG)
 
         logHandler = logging.StreamHandler()
