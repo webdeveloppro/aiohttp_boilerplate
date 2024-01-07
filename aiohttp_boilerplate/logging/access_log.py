@@ -21,9 +21,16 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
         self.logger.addHandler(logHandler)
 
     def log(self, request, response, time):
+        level = GCPSeverityMap[logging.INFO]
+        if response.status >= 500:
+            level = GCPSeverityMap[logging.ERROR]
+        elif response.status >= 400:
+            level = GCPSeverityMap[logging.WARNING]
+
         message = {
             "component": "access-log",
             "severity": GCPSeverityMap[logging.INFO],
+            "level": level.lower(),
             "time": datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
             "serviceContext": {
                 "httpRequest": {
