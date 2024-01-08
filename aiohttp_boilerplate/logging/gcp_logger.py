@@ -37,13 +37,13 @@ class GCPLogger(logging.Logger):
 
         # Only json, colored or txt format is allowed
         # Output format is hardcoded
-        if format is None or format != "json" or format != "colored":
+        if format is None:
             format = config.conf['log']['format']
 
         if format == "json":
             formatter = jsonlogger.JsonFormatter()
             logHandler.setFormatter(formatter)
-        if format == "colored":
+        elif format == "colored":
             formatter = formatters.ColoredFormatter(formatters.DEFAULT_MSG_FORMAT)
             logHandler.setFormatter(formatter)
         else:
