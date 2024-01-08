@@ -25,7 +25,7 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
         if log_type == "json":
             formatter = jsonlogger.JsonFormatter()
             logHandler.setFormatter(formatter)
-        if log_type == "colored":
+        elif log_type == "colored":
             formatter = formatters.ColoredFormatter(formatters.DEFAULT_MSG_FORMAT)
             logHandler.setFormatter(formatter)
         else:
