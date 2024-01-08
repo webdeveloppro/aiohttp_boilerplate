@@ -26,14 +26,15 @@ We have 2 logger:
 - For use this logger, you can get it from request object:
     ```
       async def get(self):
-        self.request.log.error("Error when render document")
+        ...
+        self.request.log.error("Error when render document", "incorrect body: slug filed should be str")
     ```
 - each log have requered message field and optional error field (or info field for INFO and WARNING logs)
     - message field it's first argument in function call, it should contain only short generic message
     - error or info message it's second argument in function call, it could contain any detailed information
-    - example: ```self.request.log.error("Error when render document", "incorrect body: slug filed should be str")```
+    - example: ```self.request.log.error(message, error_message)``` or ```self.request.log.info(message, info_message)```
     - You also can add extra fields to log object using extra argument
-    - example: ```self.request.log.error("Error ....", "incorrect ...", extra={"request_id": "id-1"})```
+    - example: ```self.request.log.error(message, error, extra={"request_id": "id-1"})```
 - each log have infomation about request inside serviceContext.httpRequest field
 - log json structure (example):
 ```
