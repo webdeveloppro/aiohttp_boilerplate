@@ -20,19 +20,20 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
         self.logger.addFilter(filerRequestsLogs)
         self.logger.setLevel(logging.DEBUG)
 
-        log_type = config.conf['log']['format']
-        logHandler = logging.StreamHandler()
-        if log_type == "json":
-            formatter = jsonlogger.JsonFormatter()
-            logHandler.setFormatter(formatter)
-        elif log_type == "colored":
-            formatter = formatters.ColoredFormatter(formatters.DEFAULT_MSG_FORMAT)
-            logHandler.setFormatter(formatter)
-        else:
-            formatter = formatters.TxtFormatter(formatters.DEFAULT_MSG_FORMAT)
-            logHandler.setFormatter(formatter)
-
-        self.logger.addHandler(logHandler)
+        if len(self.logger.handlers) == 0:
+            log_type = config.conf['log']['format']
+            logHandler = logging.StreamHandler()
+            if log_type == "json":
+                formatter = jsonlogger.JsonFormatter()
+                logHandler.setFormatter(formatter)
+            elif log_type == "colored":
+                formatter = formatters.ColoredFormatter(formatters.DEFAULT_MSG_FORMAT)
+                logHandler.setFormatter(formatter)
+            else:
+                formatter = formatters.TxtFormatter(formatters.DEFAULT_MSG_FORMAT)
+                logHandler.setFormatter(formatter)
+                
+            self.logger.addHandler(logHandler)
 
     def log(self, request, response, time):
         level = GCPSeverityMap[logging.INFO]
