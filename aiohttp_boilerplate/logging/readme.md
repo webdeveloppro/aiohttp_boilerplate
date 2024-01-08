@@ -3,8 +3,8 @@
 This module contains custom logging settings for our python apps
 
 We have 2 logger:
-- GCPLogger (gcp_logger.py) - our default logger, it write logs according to [Google cloud logs structure](https://cloud.google.com/logging/docs/structured-logging)
-- AccessLoggerRequestResponse (access_log.py) - this loggger override default aiohttp access logger
+- **GCPLogger** (gcp_logger.py) - our default logger, it write logs according to [Google cloud logs structure](https://cloud.google.com/logging/docs/structured-logging)
+- **AccessLoggerRequestResponse** (access_log.py) - this loggger override default aiohttp access logger
 
 ## Configuration
 - LOG_FORMAT
