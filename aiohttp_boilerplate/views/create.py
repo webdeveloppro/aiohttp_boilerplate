@@ -13,11 +13,13 @@ class CreateView(ObjectView):
         self.data = {}
 
     async def validate(self, data: dict) -> dict:
+        self.request.log.debug(f"data=${data}")
         ''' Override that method for custom validation
         '''
         return data
 
     async def perform_create(self, data: dict) -> int:
+        self.request.log.debug(f"data=${data}")
         ''' Runs after:
                 - successful validation method
                 - before_create method
@@ -86,7 +88,6 @@ class CreateView(ObjectView):
         ''' Post logic is in _post method
             You can do here authentication check before if you need
         '''
-        log.debug('%s %s', self.request.method, str(self.request.url))
         try:
             return await self._post()
         except Exception as err:

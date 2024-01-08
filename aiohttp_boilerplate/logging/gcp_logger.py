@@ -5,9 +5,9 @@ from aiohttp.web_response import StreamResponse
 from pythonjsonlogger import jsonlogger
 from datetime import datetime
 
-# logging.basicConfig(
-#     datefmt='%Y-%m-%d %H:%M:%S'
-# )
+from aiohttp_boilerplate import config
+from . import formatters
+
 
 GCPSeverityMap = {
 	logging.DEBUG: "DEBUG",
@@ -22,7 +22,7 @@ class GCPLogger(logging.Logger):
     response: StreamResponse
     component: str
 
-    def __init__(self, *args, format='json', stack_info=False, stacklevel=3, extra_labels={}, **kwargs):
+    def __init__(self, *args, format=None, stack_info=False, stacklevel=3, extra_labels={}, **kwargs):
         super().__init__(*args, **kwargs)
         self.component = ""
         if len(args) > 0:
@@ -33,15 +33,24 @@ class GCPLogger(logging.Logger):
         self.default_stack_info = stack_info
         self.default_stacklevel = stacklevel
         self.extra = extra_labels
+        logHandler = logging.StreamHandler()
+
+        # Only json, colored or txt format is allowed
+        # Output format is hardcoded
+        if format is None or format != "json" or format != "colored":
+            format = config.conf['log']['format']
 
         if format == "json":
-            logHandler = logging.StreamHandler()
             formatter = jsonlogger.JsonFormatter()
             logHandler.setFormatter(formatter)
-            self.addHandler(logHandler)
+        if format == "colored":
+            formatter = formatters.ColoredFormatter(formatters.DEFAULT_MSG_FORMAT)
+            logHandler.setFormatter(formatter)
+        else:
+            formatter = formatters.TxtFormatter(formatters.DEFAULT_MSG_FORMAT)
+            logHandler.setFormatter(formatter)
 
-        self.addFilter(self.skipHealtcheck)
-        # self.addFilter(self.add_extra)
+        self.addHandler(logHandler)
             
     def new_component_logger(self, name):
         copy_logger = GCPLogger(name)
@@ -61,24 +70,22 @@ class GCPLogger(logging.Logger):
 
     def setComponent(self, component: str):
         self.component = component
-
-    def skipHealtcheck(self, record) -> bool:
-        # Do not log healthcheck requests
-        if self.request and str(self.request.rel_url) == "/healthcheck":
-            return False
-        return True
     
-    def addExtra(self, record, level, *args):
+    def addExtra(self, record, level, extra_args, *args):
         # list of available keys for google cloud
         # google/cloud/logging_v2/handlers/handlers.py,CloudLoggingFilter, func filter
         extra = {
             "component": self.name,
             "serviceContext": {
                 **self.extra,
+                **extra_args,
             },
         }
         if len(args) > 0:
-            extra["error"] = args[0]
+            if level > logging.INFO:
+                extra["error"] = args[0]
+            else:
+                extra["info"] = args[0]
         if self.context and self.context.request_id:
             extra["trace"] = self.context.request_id
         if self.context and self.context.user:
@@ -89,7 +96,7 @@ class GCPLogger(logging.Logger):
             extra["serviceContext"]["httpRequest"] = {
                 "method": self.request.method,
                 "url": self.request.path_qs,
-                "userAgent": self.request.headers.get("userAgent", ""),
+                "userAgent": self.request.headers.get("User-Agent", ""),
                 "referer": self.request.headers.get("referer", ""),
                 # "status": "",
                 "remoteIp": self.request.remote,
@@ -98,13 +105,10 @@ class GCPLogger(logging.Logger):
             }
             if self.response and self.response.code:
                 extra["serviceContext"]["httpRequest"]["responseStatusCode"] = self.response.code
-            # ToDo
-            # calculate latency
-            # extra["http_request"]["latency"] = ""
         
         # Add severity for GCP monitoring
         extra["severity"] = GCPSeverityMap[level]
-        extra["time"] = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        extra["time"] = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 
         return extra
 
@@ -119,6 +123,6 @@ class GCPLogger(logging.Logger):
         if extra is None:
             extra = {}
 
-        extra.update(self.addExtra(msg, level, *args))
+        extra = self.addExtra(msg, level, extra, *args)
         args = []
         return super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel)

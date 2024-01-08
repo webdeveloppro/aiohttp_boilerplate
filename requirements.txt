@@ -6,6 +6,5 @@ marshmallow-jsonschema==0.13.0
 PyJWT==2.8.0
 ujson==5.9.0
 aiocache==0.12.2
-python-json-logger==2.0.7
 django_environ==0.11.2
 python-json-logger==2.0.7

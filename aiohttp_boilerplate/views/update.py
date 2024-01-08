@@ -23,7 +23,7 @@ class UpdateView(ObjectView):
         return data
 
     async def perform_update(self, where: str, params: dict, data: dict) -> dict:
-        self.request.log.debug(f"where=${where}, params=${params}, data=${data}")
+        self.request.log.debug("Perform update request", f"where=${where}, params=${params}, data=${data}")
         ''' Runs after:
                 - successful validation method
                 - before_update method
@@ -95,7 +95,6 @@ class UpdateView(ObjectView):
         return await self.patch()
 
     async def patch(self):
-        self.request.log.debug('%s %s', self.request.method, str(self.request.url))
         try:
             return await self._patch()
         except Exception as err:

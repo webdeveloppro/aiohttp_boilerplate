@@ -1,11 +1,18 @@
 import logging
+
 import importlib
-import os
 import sys
 import threading
 from logging import config as log_config
-from .helpers import GCPLogger
 from aiohttp_boilerplate.config import get_config
+
+from .gcp_logger import GCPLogger
+
+
+def setup_global_logger(format, level):
+    logging.setLoggerClass(GCPLogger)
+    logger = logging.getLogger()
+    logger.setLevel(level.upper())
 
 def get_logger(
         name:str,
