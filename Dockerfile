@@ -1,4 +1,4 @@
-FROM python:3.10-alpine3.17
+FROM python:3.12-alpine3.19@sha256:ae1f508f01ac1806e84c68b43ee0983b586426dfa39f5d21eced0dd7f5e230f4 as build
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache build-base \

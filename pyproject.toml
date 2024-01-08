@@ -1,6 +1,6 @@
 [tool.towncrier]
 name = "aiohttp-boilerplate"
-version = "0.5.0"
+version = "0.5.4"
 description = ""
 authors = ["Vladyslav Tarasenko <vladka@webdevelop.pro>", "Artem Tiumentcev <artem@webdevelop.pro>", "George Shapchits <george_g@webdevelop.pro>"]
 license = "MIT"
