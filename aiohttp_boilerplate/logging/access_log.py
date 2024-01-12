@@ -58,10 +58,13 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
                     "remoteIp": request.remote,
                     "latency": time,
                     "protocol": request.scheme,
-                }
+                },
             }
         }
-        if "context" in request:
-            message["trace"] = request.context.request_id
+        if hasattr(request, "context"):
+            if hasattr(request.context, "request_id"):
+                message["serviceContext"]["trace"] = request.context.request_id
+            if hasattr(request.context, "extra_data"):
+                message["serviceContext"].update(request.context.extra_data)
             # message["json_fields"]["user"] = request.context.user.id
         self.logger.info('completed handling request', extra=message)
