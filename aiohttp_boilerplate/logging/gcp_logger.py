@@ -108,6 +108,7 @@ class GCPLogger(logging.Logger):
         
         # Add severity for GCP monitoring
         extra["severity"] = GCPSeverityMap[level]
+        extra["level"] = GCPSeverityMap[level].lower()
         extra["time"] = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 
         return extra
