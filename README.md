@@ -5,4 +5,5 @@
 - [ ] eliminate JSONError exception
 - [ ] Add more examples
 - [ ] Add integration with prometeus
+- [ ] Move to ujson instead of json library
 

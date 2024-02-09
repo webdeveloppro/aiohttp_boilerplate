@@ -2,6 +2,7 @@ import datetime
 import decimal
 import json
 import types
+import ipaddress
 from functools import partial
 
 from .exceptions import JSONHTTPError
@@ -25,6 +26,8 @@ def fix_json(obj):
         return obj()
     if isinstance(obj, models.Manager):
         return obj.data
+    if isinstance(obj, ipaddress.IPv4Address):
+        return str(obj)
     raise TypeError('unknown type: ', type(obj), obj)
 
 
