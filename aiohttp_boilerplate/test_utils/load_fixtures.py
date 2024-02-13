@@ -86,4 +86,4 @@ class LoadFixture:
             await stmt.fetch(*row.values())
 
         # Fix auto increments after
-        await con.execute(f"select setval('{self.table}_id_seq', (select max(id) from {self.table}))")
+        await con.execute(f"select setval('{self.table}_id_seq', (select max(id)+1 from {self.table}))")
