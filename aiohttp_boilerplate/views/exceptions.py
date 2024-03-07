@@ -17,7 +17,7 @@ def JSONHTTPError(message, error_class=None, headers=None):
     headers['Access-Control-Allow-Credentials'] = 'true'
     headers['Access-Control-Allow-Origin'] = '*'
     headers['Access-Control-Allow-Methods'] = \
-        'GET, POST, PUT, OPTIONS, DELETE, PATCH'
+        'GET, POST, PUT, OPTIONS, DELETE, PATCH, X-Request-ID'
     headers['Access-Control-Allow-Headers'] = \
         'Authorization, X-PINGOTHER, Content-Type, X-Requested-With'
 

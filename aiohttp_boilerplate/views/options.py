@@ -4,7 +4,7 @@ import marshmallow
 
 from aiohttp import web
 
-from . import fixed_dump
+from aiohttp_boilerplate.views import fixed_dump
 from .exceptions import JSONHTTPError
 from marshmallow_jsonschema import JSONSchema
 
@@ -81,12 +81,12 @@ class SchemaOptionsView(OptionsView):
         try:
             schema_result = schema().loads(data, partial=partial)
         except marshmallow.ValidationError as err:
-            raise JSONHTTPError(err.messages)
+            raise web.HTTPBadRequest(text=json.dumps(err.messages))
         except Exception as err:
             raise JSONHTTPError(err)
 
         return schema_result
-    
+
      # Return json schema for marshmellow form)
     def json_schema(self, schema):
         json_schema = JSONSchema()

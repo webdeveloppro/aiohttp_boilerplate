@@ -53,7 +53,7 @@ class UpdateView(ObjectView):
         '''
         return data
 
-    async def _patch(self):
+    async def _patch(self, data: dict):
         ''' Post method handler, will run one by one
             - on_start
             - get_schema_data/get_data
@@ -66,15 +66,9 @@ class UpdateView(ObjectView):
 
         await self.on_start()
 
-        data = {}
-        if self.schema:
-            data = await self.get_schema_data(partial=self.partial)
-        else:
-            data = await self.get_request_data(to_json=True)
-
         data = await self.validate(data)
         if len(data) == 0:
-            raise JSONHTTPError({'error': 'No content'}, web.HTTPBadRequest)
+            raise web.HTTPBadRequest(text=r"{'__error__': ['No content']}")
 
         self.data.update(await self.before_update(data))
         updated = await self.perform_update(
@@ -84,7 +78,7 @@ class UpdateView(ObjectView):
         )
 
         if updated == 0:
-            raise JSONHTTPError({'error': 'No object updated'}, web.HTTPNotFound)
+            raise web.HTTPNotFound(text=r"{'__error__': ['No object updated']}")
 
         self.data.update(await self.after_update(data))
         response = await self.get_data(self.obj)
@@ -95,23 +89,14 @@ class UpdateView(ObjectView):
         return await self.patch()
 
     async def patch(self):
-        try:
-            return await self._patch()
-        except Exception as err:
-            # show any 4xx errors directly
-            if hasattr(err, 'status_code'):
-                if err.status_code >= 400 and err.status_code < 500:
-                    raise err
 
-            self.request.log.error(err, exc_info=True)
-            err_msg = 'HTTP Internal Server Error'
+        data = {}
+        if self.schema:
+            data = await self.get_schema_data(partial=self.partial)
+        else:
+            data = await self.get_request_data(to_json=True)
 
-            if log.level == logging.DEBUG:
-                err_msg = str(err)
-
-            raise JSONHTTPError(
-                {'error': err_msg}, web.HTTPInternalServerError
-            ) from err
+        return await self._patch(data)
 
     async def put(self):
         return await self._put()

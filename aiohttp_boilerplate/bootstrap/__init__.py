@@ -6,9 +6,6 @@ try:
 except ModuleNotFoundError:
     pass
 
-import logging
-
-
 from aiohttp import web
 from aiohttp_boilerplate import config
 from aiohttp_boilerplate.dbpool import pg as db
