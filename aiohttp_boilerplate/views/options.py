@@ -81,7 +81,7 @@ class SchemaOptionsView(OptionsView):
         try:
             schema_result = schema().loads(data, partial=partial)
         except marshmallow.ValidationError as err:
-            raise JSONHTTPError(err.messages)
+            raise JSONHTTPError(err.messages, request=self.request)
         except Exception as err:
             raise JSONHTTPError(err)
 
