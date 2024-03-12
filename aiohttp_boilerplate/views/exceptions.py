@@ -12,14 +12,16 @@ def JSONHTTPError(message, error_class=None, headers=None, request=None):
     headers = headers or {}
     headers['Content-Type'] = 'application/json'
 
+    domain = request.app.conf.get('domain', '')
     if request is not None:
-        domain = request.app.conf.get('domain', '')
         allow = f"{request.headers.get('scheme', 'https')}://{domain}"
         origin = str(request.headers.get('origin', ''))
         if origin.count(domain) > 0:
             headers['Access-Control-Allow-Origin'] = origin
         else:
             headers['Access-Control-Allow-Origin'] = allow
+    else:
+        headers['Access-Control-Allow-Origin'] = domain
 
     # ToDo
     # move to middleware

@@ -145,10 +145,12 @@ class ListView(RetrieveView):
 
             log.error(err, exc_info=True)
             err_msg = 'HTTP Internal Server Error'
-            
+
             if log.level == logging.DEBUG:
                 err_msg = str(err)
-            
+
             raise JSONHTTPError(
-                {'error': err_msg}, web.HTTPInternalServerError
+                {'__error__': [err_msg]},
+                web.HTTPInternalServerError,
+                request=self.request
             ) from err

@@ -46,8 +46,9 @@ class RetrieveView(ObjectView):
 
         if getattr(self.obj, 'id', None) is None:
             raise JSONHTTPError(
-                {"__error__": "No object found"},
+                {"__error__": ["No object found"]},
                 web.HTTPNotFound,
+                request=self.request
             )
 
         await self.after_get()
@@ -70,5 +71,7 @@ class RetrieveView(ObjectView):
                 err_msg = str(err)
 
             raise JSONHTTPError(
-                {'error': err_msg}, web.HTTPInternalServerError
+                {'__error__': [err_msg]},
+                web.HTTPInternalServerError,
+                request=self.request,
             ) from err

@@ -13,8 +13,14 @@ async def validate_token(headers: dict, auth_url: str) -> Mapping:
         async with session.get(auth_url) as resp:
             if resp.status != 204 and resp.status != 200:
                 raise JSONHTTPError(
-                    {"__error__": "Invalid key"},
+                    {"__error__": ["Invalid key"]},
                     aiohttp.web.HTTPForbidden,
+                    headers={
+                        'Access-Control-Allow-Origin': headers.get(
+                            'origin',
+                            config.conf.get('domain', ''),
+                        )
+                    }
                 )
             # ToDo
             # Check if user expired

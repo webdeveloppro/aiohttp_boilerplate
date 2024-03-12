@@ -74,7 +74,7 @@ class UpdateView(ObjectView):
 
         data = await self.validate(data)
         if len(data) == 0:
-            raise JSONHTTPError({'error': 'No content'}, web.HTTPBadRequest, request=self.request)
+            raise JSONHTTPError({'__error__': ['No content']}, web.HTTPBadRequest, request=self.request)
 
         self.data.update(await self.before_update(data))
         updated = await self.perform_update(
@@ -84,7 +84,7 @@ class UpdateView(ObjectView):
         )
 
         if updated == 0:
-            raise JSONHTTPError({'error': 'No object updated'}, web.HTTPNotFound, request=self.request)
+            raise JSONHTTPError({'__error__': ['No object updated']}, web.HTTPNotFound, request=self.request)
 
         self.data.update(await self.after_update(data))
         response = await self.get_data(self.obj)
@@ -110,7 +110,9 @@ class UpdateView(ObjectView):
                 err_msg = str(err)
 
             raise JSONHTTPError(
-                {'error': err_msg}, web.HTTPInternalServerError
+                {'__error__': [err_msg]},
+                web.HTTPInternalServerError,
+                request=self.request,
             ) from err
 
     async def put(self):
