@@ -19,7 +19,7 @@ async def cross_origin_rules(request, handler):
     response.headers['Access-Control-Allow-Methods'] = \
         'GET, POST, PUT, OPTIONS, DELETE, PATCH'
     response.headers['Access-Control-Allow-Headers'] = \
-        'Authorization, X-PINGOTHER, Content-Type, X-Requested-With, X-Request-ID'
+        'Authorization, X-PINGOTHER, Content-Type, X-Requested-With, X-Request-ID, Vary'
 
     return response
 

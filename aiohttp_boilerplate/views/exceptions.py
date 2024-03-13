@@ -28,9 +28,9 @@ def JSONHTTPError(message, error_class=None, headers=None, request=None):
     # move to middleware
     headers['Access-Control-Allow-Credentials'] = 'true'
     headers['Access-Control-Allow-Methods'] = \
-        'GET, POST, PUT, OPTIONS, DELETE, PATCH, X-Request-ID'
+        'GET, POST, PUT, OPTIONS, DELETE, PATCH'
     headers['Access-Control-Allow-Headers'] = \
-        'Authorization, X-PINGOTHER, Content-Type, X-Requested-With'
+        'Authorization, X-PINGOTHER, Content-Type, X-Requested-With, X-Request-ID, Vary'
 
     if error_class is None:
         error_class = web.HTTPBadRequest
