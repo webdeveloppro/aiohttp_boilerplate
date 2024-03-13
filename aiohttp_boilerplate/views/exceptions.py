@@ -2,6 +2,7 @@ import json
 from aiohttp import web
 
 from aiohttp_boilerplate.logging import get_logger
+from aiohttp_boilerplate import config
 
 log = get_logger('aiohttp_boilerplate.views')
 
@@ -12,7 +13,7 @@ def JSONHTTPError(message, error_class=None, headers=None, request=None):
     headers = headers or {}
     headers['Content-Type'] = 'application/json'
 
-    domain = request.app.conf.get('domain', '')
+    domain = config.conf.get('domain', '')
     if request is not None:
         allow = f"{request.headers.get('scheme', 'https')}://{domain}"
         origin = str(request.headers.get('origin', ''))
