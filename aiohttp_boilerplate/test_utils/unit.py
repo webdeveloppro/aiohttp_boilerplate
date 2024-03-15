@@ -51,7 +51,7 @@ class UnitTestCase(AioHTTPTestCase):
         )
 
         if resp.headers.get('content-type').count('json') > 0:
-            jsn = await resp.json()
-            return resp.status, jsn or {}
+            data = await resp.json()
+            return resp.status, data or {} #, resp.headers
         else:
-            return resp.status, await resp.text()
+            return resp.status, await resp.text() #, resp.headers
