@@ -279,7 +279,10 @@ class ObjectView(SchemaOptionsView):
             # Keep data in the bytes
             # data = self.schema().dump(raw_data)
             for f in self.schema().fields:
-                data[f] = getattr(obj, f)
+                if f == "data":
+                    data[f] = getattr(obj, f)["data"]
+                else:
+                    data[f] = getattr(obj, f)
         else:
             # ToDo
             # use obj from incoming parameter
