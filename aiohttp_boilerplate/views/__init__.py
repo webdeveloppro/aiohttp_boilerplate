@@ -28,7 +28,9 @@ def fix_json(obj):
         return obj.data
     if isinstance(obj, ipaddress.IPv4Address):
         return str(obj)
-    raise TypeError('unknown type: ', type(obj), obj)
+    # raise an error if its not dict
+    if isinstance(obj, dict) is False:
+        raise TypeError('unknown type: ', type(obj), obj)
 
 
 fixed_dump = partial(json.dumps, indent=None, default=fix_json)
