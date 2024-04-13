@@ -38,7 +38,10 @@ class GCPLogger(logging.Logger):
         # Only json, colored or txt format is allowed
         # Output format is hardcoded
         if format is None:
-            format = config.conf['log']['format']
+            if config.conf is not None and 'log' in config.conf:
+                format = config.conf['log'].get('format', 'json')
+            else:
+                format = "json"
 
         if format == "json":
             formatter = jsonlogger.JsonFormatter()
@@ -51,7 +54,7 @@ class GCPLogger(logging.Logger):
             logHandler.setFormatter(formatter)
 
         self.addHandler(logHandler)
-            
+
     def new_component_logger(self, name):
         copy_logger = GCPLogger(name)
         copy_logger.request = self.request
@@ -70,7 +73,7 @@ class GCPLogger(logging.Logger):
 
     def setComponent(self, component: str):
         self.component = component
-    
+
     def addExtra(self, record, level, extra_args, *args):
         # list of available keys for google cloud
         # google/cloud/logging_v2/handlers/handlers.py,CloudLoggingFilter, func filter
@@ -105,7 +108,7 @@ class GCPLogger(logging.Logger):
             }
             if self.response and self.response.code:
                 extra["serviceContext"]["httpRequest"]["responseStatusCode"] = self.response.code
-        
+
         # Add severity for GCP monitoring
         extra["severity"] = GCPSeverityMap[level]
         extra["time"] = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
