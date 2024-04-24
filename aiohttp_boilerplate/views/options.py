@@ -174,7 +174,7 @@ class SchemaOptionsView(OptionsView):
                     field.joinOn
                 )
                 aliases['t{}'.format(t_index)] = name
-                nested_data = self.add_fields_from_schema(field.nested(), 't%d' % t_index)
+                nested_data = self.add_fields_from_schema(field.nested(), 't%d' % t_index, t_index + 1)
                 _fields.append(nested_data["fields"])
                 aliases.update(nested_data["aliases"])
                 sql_tables += nested_data["sql_tables"]
