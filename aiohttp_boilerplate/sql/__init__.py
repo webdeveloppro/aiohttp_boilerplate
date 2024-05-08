@@ -1,7 +1,7 @@
 import re
 import traceback
 
-from aiohttp_boilerplate.sql.exceptions import component_name, loggger
+from aiohttp_boilerplate.sql.exceptions import component_name, logger
 from aiohttp_boilerplate.sql import consts
 
 CUSTOM_TRACE = 5
@@ -19,7 +19,7 @@ class SQL(object):
         self.params = {}
         self.conn = None
         
-        self.log = loggger
+        self.log = logger
         if log is not None:
             log.set_component_name(component_name)
             self.log = log
