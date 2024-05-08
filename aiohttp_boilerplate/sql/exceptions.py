@@ -1,3 +1,5 @@
 from aiohttp_boilerplate.logging import get_logger
 
-log = get_logger('aiohttp_boilerplate.sql')
+component_name = 'aiohttp_boilerplate.sql'
+
+log = get_logger(component_name)

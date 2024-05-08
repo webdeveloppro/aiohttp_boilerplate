@@ -2,13 +2,15 @@ import logging
 from aiohttp import web
 
 from .options import ObjectView
-from .exceptions import JSONHTTPError, log
+from .exceptions import JSONHTTPError, component_name
 
 
 class UpdateView(ObjectView):
 
     def __init__(self, request):
         super().__init__(request)
+        self.log = request.log
+        self.log.set_component_name(component_name)
 
         # Can we update a part of schema data
         self.partial = True
@@ -17,13 +19,13 @@ class UpdateView(ObjectView):
         self.data = {}
 
     async def validate(self, data: dict) -> dict:
-        self.request.log.debug(f"data=${data}")
+        self.log.debug(f"data=${data}")
         """ Override that method for custom validation
         """
         return data
 
     async def perform_update(self, where: str, params: dict, data: dict) -> dict:
-        self.request.log.debug("Perform update request", f"where=${where}, params=${params}, data=${data}")
+        self.log.debug("Perform update request", f"where=${where}, params=${params}, data=${data}")
         ''' Runs after:
                 - successful validation method
                 - before_update method
@@ -32,7 +34,7 @@ class UpdateView(ObjectView):
         return await self.obj.update(where, params, data)
 
     async def before_update(self, data: dict) -> dict:
-        self.request.log.debug(f"data=${data}")
+        self.log.debug(f"data=${data}")
         ''' Runs after:
                 - successful validation method
             If you want to change your data before system calls insert method
@@ -41,7 +43,7 @@ class UpdateView(ObjectView):
         return data
 
     async def after_update(self, data: dict) -> dict:
-        self.request.log.debug(f"data=${data}")
+        self.log.debug(f"data=${data}")
         ''' Runs after:
                 - successful validation method
                 - before_create method
@@ -103,10 +105,10 @@ class UpdateView(ObjectView):
                 if err.status_code >= 400 and err.status_code < 500:
                     raise err
 
-            self.request.log.error(err, exc_info=True)
+            self.log.error(err, exc_info=True)
             err_msg = 'HTTP Internal Server Error'
 
-            if log.level == logging.DEBUG:
+            if self.log.level == logging.DEBUG:
                 err_msg = str(err)
 
             raise JSONHTTPError(
