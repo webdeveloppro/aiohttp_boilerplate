@@ -3,7 +3,7 @@ import logging
 from aiohttp import web
 
 from .retrieve import RetrieveView
-from .exceptions import JSONHTTPError, log
+from .exceptions import JSONHTTPError, logger_name
 
 ALLOW_ORDER = ["asc", "desc"]
 
@@ -19,6 +19,8 @@ class ListView(RetrieveView):
 
     def __init__(self, request):
         super().__init__(request)
+        self.log = request.log
+        self.log.set_component_name(logger_name)
         self.objects = self.get_objects()
         self.limit = self.get_limit()
         self.order = self.get_order()
@@ -86,7 +88,7 @@ class ListView(RetrieveView):
         return beautiful_data
 
     async def perform_get(self, fields="", **kwargs):
-        self.request.log.debug("Perform get request" f"fields=${fields}, kwargs: ${kwargs}")
+        self.log.debug("Perform get request" f"fields=${fields}, kwargs: ${kwargs}")
         aliases, fields = self.join_prepare_fields(fields)
         raw_data = await self.objects.sql.select(
             fields=fields, many=True, **kwargs
@@ -94,7 +96,7 @@ class ListView(RetrieveView):
         self.objects.set_data(self.join_beautiful_output(aliases, raw_data))
 
     async def perform_get_count(self, where, params):
-        self.request.log.debug("Perform get count", f"where=${where}, params: ${params}")
+        self.log.debug("Perform get count", f"where=${where}, params: ${params}")
         return await self.objects.sql.get_count(where=where, params=params)
 
     async def get_count(self, where='', params=None):
@@ -143,10 +145,10 @@ class ListView(RetrieveView):
                 if err.status_code >= 400 and err.status_code < 500:
                     raise err
 
-            log.error(err, exc_info=True)
+            self.log.error(err, exc_info=True)
             err_msg = 'HTTP Internal Server Error'
 
-            if log.level == logging.DEBUG:
+            if self.log.level == logging.DEBUG:
                 err_msg = str(err)
 
             raise JSONHTTPError(

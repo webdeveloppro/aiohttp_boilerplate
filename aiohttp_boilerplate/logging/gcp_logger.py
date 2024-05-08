@@ -65,6 +65,9 @@ class GCPLogger(logging.Logger):
 
         return copy_logger
 
+    def set_component_name(self, name):
+        self.component = name
+
     def setRequest(self, request: Request):
         self.request = request
 
@@ -109,7 +112,18 @@ class GCPLogger(logging.Logger):
             if self.response and self.response.code:
                 extra["serviceContext"]["httpRequest"]["responseStatusCode"] = self.response.code
 
+            extra["serviceContext"]["user"] = self.request.headers.get("Authorization")
+        
+            if hasattr(self.request, "context"):
+                if hasattr(self.request.context, "request_id"):
+                    extra["serviceContext"]["request_id"] = self.request.context.request_id
+                if hasattr(self.request.context, "msg_id"):
+                    extra["serviceContext"]["msg_id"] = self.request.context.request_id
+                if hasattr(self.request.context, "extra_data"):
+                    extra["serviceContext"].update(self.request.context.extra_data)
+
         # Add severity for GCP monitoring
+        extra["level"] = GCPSeverityMap[level].lower()
         extra["severity"] = GCPSeverityMap[level]
         extra["time"] = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 

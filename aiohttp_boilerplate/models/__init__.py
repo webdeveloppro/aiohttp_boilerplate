@@ -7,9 +7,10 @@ from aiohttp_boilerplate.sql import SQL
 
 class Manager:
 
-    def __init__(self, db_pool, is_list=False, storage=None):
+    def __init__(self, db_pool, is_list=False, storage=None, log=None):
         self.is_list = is_list
         self.db_pool = db_pool
+        self.log = log
 
         # ToDo
         # Rename to self.get_table()
@@ -29,7 +30,7 @@ class Manager:
         '''
         if storage is None:
             storage = SQL
-        self.sql = storage(table, db_pool)
+        self.sql = storage(table, db_pool, log=self.log)
 
     def __getattribute__(self, key):
         try:

@@ -245,7 +245,7 @@ class ObjectView(SchemaOptionsView):
         if self.get_model() is None:
             warnings.warn('get_model return None', RuntimeWarning)
         else:
-            self.obj = self.get_model()(db_pool=request.app.db_pool)
+            self.obj = self.get_model()(db_pool=request.app.db_pool, log=request.log)
 
     # Return model object
     def get_model(self):
