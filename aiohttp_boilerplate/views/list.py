@@ -3,7 +3,7 @@ import logging
 from aiohttp import web
 
 from .retrieve import RetrieveView
-from .exceptions import JSONHTTPError, component_name
+from .exceptions import JSONHTTPError, logger_name
 
 ALLOW_ORDER = ["asc", "desc"]
 
@@ -20,7 +20,7 @@ class ListView(RetrieveView):
     def __init__(self, request):
         super().__init__(request)
         self.log = request.log
-        self.log.set_component_name(component_name)
+        self.log.set_component_name(logger_name)
         self.objects = self.get_objects()
         self.limit = self.get_limit()
         self.order = self.get_order()

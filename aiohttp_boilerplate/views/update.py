@@ -2,7 +2,7 @@ import logging
 from aiohttp import web
 
 from .options import ObjectView
-from .exceptions import JSONHTTPError, component_name
+from .exceptions import JSONHTTPError, logger_name
 
 
 class UpdateView(ObjectView):
@@ -10,7 +10,7 @@ class UpdateView(ObjectView):
     def __init__(self, request):
         super().__init__(request)
         self.log = request.log
-        self.log.set_component_name(component_name)
+        self.log.set_component_name(logger_name)
 
         # Can we update a part of schema data
         self.partial = True
