@@ -73,7 +73,7 @@ class Manager:
         if self.is_list:
             for record in data:
                 # new_obj = {}  # not sure  self.__class__()
-                new_obj = self.__class__(db_pool=self.db_pool)
+                new_obj = self.__class__(db_pool=self.db_pool, log=self.log)
                 new_obj.set_data(dict(record))
                 self.data.append(new_obj)
         else:
