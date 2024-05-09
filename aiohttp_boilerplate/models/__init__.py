@@ -8,9 +8,9 @@ from aiohttp_boilerplate.sql import SQL
 class Manager:
 
     def __init__(self, db_pool, is_list=False, storage=None, log=None):
+        self.log = log
         self.is_list = is_list
         self.db_pool = db_pool
-        self.log = log
 
         # ToDo
         # Rename to self.get_table()
