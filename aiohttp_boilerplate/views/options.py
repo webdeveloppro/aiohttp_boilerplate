@@ -156,7 +156,7 @@ class SchemaOptionsView(OptionsView):
                     return True
         return False
 
-    def add_fields_from_schema(self, _schema, _index="t0", t_index=1):
+    def add_fields_from_schema(self, _schema, _index="t0", t_index=1, parent_schema=""):
         _fields = []
         aliases = {'t0': ''}
         sql_tables = ''
@@ -173,8 +173,11 @@ class SchemaOptionsView(OptionsView):
                     't%d' % t_index,
                     field.joinOn
                 )
-                aliases['t{}'.format(t_index)] = name
-                nested_data = self.add_fields_from_schema(field.nested(), 't%d' % t_index, t_index + 1)
+                if parent_schema != "":
+                    aliases['t{}'.format(t_index)] = "{}.{}".format(parent_schema, name)
+                else:
+                    aliases['t{}'.format(t_index)] = name
+                nested_data = self.add_fields_from_schema(field.nested(), 't%d' % t_index, t_index + 1, aliases["t{}".format(t_index)])
                 _fields.append(nested_data["fields"])
                 aliases.update(nested_data["aliases"])
                 sql_tables += nested_data["sql_tables"]
@@ -216,9 +219,6 @@ class SchemaOptionsView(OptionsView):
             return {}
 
         temp = {}
-        for k, v in aliases.items():
-            if v != '':
-                temp[v] = {}
         for k, v in raw_data.items():
             d = k.split('__')
             if len(d) == 1:
@@ -226,7 +226,12 @@ class SchemaOptionsView(OptionsView):
             elif aliases[d[0]] == '':
                 temp[d[1]] = v
             else:
-                temp[aliases[d[0]]][d[1]] = v
+                t = temp
+                for key in aliases[d[0]].split("."):
+                    if key not in t:
+                        t[key] = {}
+                    t = t[key]
+                t[d[1]] = v
 
         return temp
 
