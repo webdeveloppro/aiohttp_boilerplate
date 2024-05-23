@@ -76,14 +76,14 @@ class SchemaOptionsView(OptionsView):
 
         data = await self.get_request_data()
         if not data:
-            raise JSONHTTPError({'__error__': ['Empty data']}, request=self.request)
+            raise JSONHTTPError(self.request, {'__error__': ['Empty data']})
 
         try:
             schema_result = schema().loads(data, partial=partial)
         except marshmallow.ValidationError as err:
-            raise JSONHTTPError(err.messages, request=self.request)
+            raise JSONHTTPError(self.request, err.messages)
         except Exception as err:
-            raise JSONHTTPError(err, request=self.request)
+            raise JSONHTTPError(self.request, err)
 
         return schema_result
 
@@ -262,7 +262,7 @@ class ObjectView(SchemaOptionsView):
         id = self.request.match_info.get('id')
 
         if id is None:
-            raise JSONHTTPError({"__error__": ["No id found"]}, request=self.request)
+            raise JSONHTTPError(self.request, {"__error__": ["No id found"]})
         # ToDo
         # Check if aiohttp can parse string/numeric data
         try:
