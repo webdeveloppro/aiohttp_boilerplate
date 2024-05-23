@@ -152,7 +152,7 @@ class ListView(RetrieveView):
                 err_msg = str(err)
 
             raise JSONHTTPError(
+                self.request,
                 {'__error__': [err_msg]},
                 web.HTTPInternalServerError,
-                request=self.request
             ) from err

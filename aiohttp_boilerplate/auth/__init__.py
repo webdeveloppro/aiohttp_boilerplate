@@ -4,23 +4,17 @@ import aiohttp
 import jwt
 import ujson
 
-from aiohttp_boilerplate import config
 from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 
 
-async def validate_token(headers: dict, auth_url: str) -> Mapping:
+async def validate_token(headers:dict, auth_url: str) -> Mapping:
     async with aiohttp.ClientSession(json_serialize=ujson, headers=headers) as session:
         async with session.get(auth_url) as resp:
             if resp.status != 204 and resp.status != 200:
                 raise JSONHTTPError(
+                    None,
                     {"__error__": ["Invalid key"]},
                     aiohttp.web.HTTPForbidden,
-                    headers={
-                        'Access-Control-Allow-Origin': headers.get(
-                            'origin',
-                            config.conf.get('domain', ''),
-                        )
-                    }
                 )
             # ToDo
             # Check if user expired

@@ -76,7 +76,7 @@ class CreateView(ObjectView):
         data = await self.validate(data)
 
         if len(data) == 0:
-            raise JSONHTTPError({'__error__': ['No content']}, web.HTTPBadRequest, request=self.request)
+            raise JSONHTTPError(self.request, {'__error__': ['No content']}, web.HTTPBadRequest)
 
         self.data.update(await self.before_create(data))
         self.obj = await self.perform_create(
@@ -106,7 +106,7 @@ class CreateView(ObjectView):
                 err_msg = str(err)
 
             raise JSONHTTPError(
+                self.request,
                 {'error': [err_msg]},
                 web.HTTPInternalServerError,
-                request=self.request
             ) from err

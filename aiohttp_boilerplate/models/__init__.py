@@ -1,6 +1,6 @@
 from aiohttp import web
 
-from aiohttp_boilerplate.views import fixed_dump
+from aiohttp_boilerplate.views import fixed_dump, JSONHTTPError
 from aiohttp_boilerplate.sql import SQL
 
 
@@ -87,9 +87,9 @@ class Manager:
 
         if (self.is_list and not self.data) or \
             (not self.is_list and self.id is None):
-            err_msg = "{'__error__':['Object %s not found by get_by_id']}" % self.__class__.__name__
-            raise web.HTTPNotFound(
-                text=err_msg,
+            raise JSONHTTPError(None,
+                {'__error__':['Object %s not found by get_by_id' % self.__class__.__name__]},
+                web.HTTPNotFound,
             )
 
         return self
@@ -119,9 +119,9 @@ class Manager:
 
         if (self.is_list and not self.data) or \
             (not self.is_list and self.id is None):
-            err_msg = "{'__error__': ['Object %s not found by get_by']}" % self.__class__.__name__
-            raise web.HTTPNotFound(
-                text=err_msg,
+            raise JSONHTTPError(None,
+                {'__error__': ['Object %s not found by get_by' % self.__class__.__name__] },
+                web.HTTPNotFound,
             )
 
         return self
@@ -173,7 +173,11 @@ class Manager:
 
         if where == '':
             if self.id is None:
-                raise web.HTTPBadRequest(text="{'__error__':['id is empty dont know how to update']}")
+                raise JSONHTTPError(
+                    None,
+                    {'__error__':['id is empty dont know how to update']},
+                    web.HTTPBadRequest,
+                )
             where = "id={id}"
             params = {'id': self.id}
 
@@ -226,7 +230,11 @@ class JsonbManager(Manager):
         if data and self.__key_name__ in data:
             self.set_data(data[self.__key_name__])
         else:
-            raise web.HTTPBadRequest(text="{'__error__':['No object updated']}")
+            raise JSONHTTPError(
+                None,
+                {'__error__':['No object updated']},
+                web.HTTPBadRequest,
+            )
         return self.data
 
     async def insert(self, where, params, data):
@@ -259,7 +267,11 @@ class JsonbManager(Manager):
         result = await self.sql.execute(query, params)
         result = int(result.replace('UPDATE ', ''))
         if result == 0:
-            raise web.HTTPBadRequest(text="{'__error__':['No object updated']}")
+            raise JSONHTTPError(
+                None,
+                {'__error__':['No object updated']},
+                web.HTTPBadRequest,
+            )
         return result
 
     async def update(self, where, params, data):
