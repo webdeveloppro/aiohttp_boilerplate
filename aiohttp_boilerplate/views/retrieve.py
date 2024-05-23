@@ -2,13 +2,15 @@ import logging
 from aiohttp import web
 
 from .options import ObjectView
-from .exceptions import JSONHTTPError, log
+from .exceptions import JSONHTTPError, logger_name
 
 
 class RetrieveView(ObjectView):
 
     def __init__(self, request):
         super().__init__(request)
+        self.log = request.log
+        self.log.set_component_name(logger_name)
         self.fields = '*'
         self.where = ''
         self.params = {}
@@ -46,7 +48,8 @@ class RetrieveView(ObjectView):
 
         if getattr(self.obj, 'id', None) is None:
             raise JSONHTTPError(
-                {"__error__": "No object found"},
+                self.request,
+                {"__error__": ["No object found"]},
                 web.HTTPNotFound,
             )
 
@@ -54,7 +57,7 @@ class RetrieveView(ObjectView):
         return await self.get_data(self.obj)
 
     async def get(self):
-        self.request.log.debug('Start process GET request')
+        self.log.debug('Start process GET request')
         try:
             return self.json_response(await self._get())
         except Exception as err:
@@ -63,12 +66,14 @@ class RetrieveView(ObjectView):
                 if err.status_code >= 400 and err.status_code < 500:
                     raise err
 
-            self.request.log.error("Failed process GET request", err, exc_info=True)
+            self.log.error("Failed process GET request", err, exc_info=True)
             err_msg = 'HTTP Internal Server Error'
 
-            if log.level == logging.DEBUG:
+            if self.log.level == logging.DEBUG:
                 err_msg = str(err)
 
             raise JSONHTTPError(
-                {'error': err_msg}, web.HTTPInternalServerError
+                self.request,
+                {'__error__': [err_msg]},
+                web.HTTPInternalServerError,
             ) from err

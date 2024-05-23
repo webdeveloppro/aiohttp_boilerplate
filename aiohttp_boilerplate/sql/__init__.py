@@ -1,7 +1,7 @@
 import re
 import traceback
 
-from aiohttp_boilerplate.sql.exceptions import log
+from aiohttp_boilerplate.sql.exceptions import logger_name, logger
 from aiohttp_boilerplate.sql import consts
 
 CUSTOM_TRACE = 5
@@ -12,12 +12,17 @@ class SQLException(Exception):
 
 class SQL(object):
 
-    def __init__(self, table, db_pool=None):
+    def __init__(self, table, db_pool=None, log=None):
         self.db_pool = db_pool
         self.table = table
         self.query = ''
         self.params = {}
         self.conn = None
+        
+        self.log = logger
+        if log is not None:
+            log.set_component_name(logger_name)
+            self.log = log
 
     def __str__(self) -> str:
         return "{} {} {} {}".format(
@@ -32,7 +37,7 @@ class SQL(object):
             try:
                 self.conn = await self.db_pool.acquire()
             except Exception as exp:
-                log.error('db pool lost connection')
+                self.log.error('db pool lost connection')
                 raise exp
         return self.conn
 
@@ -70,7 +75,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "execute"})
+        self.log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "execute"})
 
         try:
             if fetch_method == consts.EXECUTE:
@@ -121,10 +126,10 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "select"})
+        self.log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "select"})
 
-        if log.level == CUSTOM_TRACE:
-            log.warning('\n'.join([str(line) for line in traceback.extract_stack()]))
+        if self.log.level == CUSTOM_TRACE:
+            self.log.warning('\n'.join([str(line) for line in traceback.extract_stack()]))
 
         try:
             stmt = await self.conn.prepare(self.query)
@@ -151,7 +156,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "insert"})
+        self.log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "insert"})
 
         try:
             result = await self.conn.fetchrow(self.query, *data.values())
@@ -176,7 +181,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "update"})
+        self.log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "update"})
 
         try:
             result = await self.conn.execute(self.query, *self.params.values())
@@ -197,7 +202,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "delete"})
+        self.log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "delete"})
 
         try:
             result = await self.conn.execute(self.query, *params.values())
@@ -218,7 +223,7 @@ class SQL(object):
 
         await self.get_connection()
 
-        log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "get_count"})
+        self.log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "get_count"})
 
         try:
             result = await self.conn.fetchval(self.query, *params.values())
@@ -240,7 +245,7 @@ class SQL(object):
         self.params = {}
         self.params.update(params)
 
-        log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "is_exists"})
+        self.log.debug('sql query', f'{self.prepare_log(self.query, self.params.values())}', extra={"sql_type": "is_exists"})
 
         try:
             result = await self.conn.fetchval(self.query, *self.params.values())

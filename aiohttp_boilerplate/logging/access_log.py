@@ -48,6 +48,7 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
             "level": level.lower(),
             "time": datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
             "serviceContext": {
+                "user": request.headers.get("Authorization"),
                 "httpRequest": {
                     "method": request.method,
                     "url": request.path_qs,
@@ -61,7 +62,10 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
                 }
             }
         }
-        if "context" in request:
-            message["trace"] = request.context.request_id
-            # message["json_fields"]["user"] = request.context.user.id
+        if hasattr(request, "context"):
+            if hasattr(request.context, "request_id"):
+                message["serviceContext"]["request_id"] = request.context.request_id
+            if hasattr(request.context, "extra_data"):
+                message["serviceContext"].update(request.context.extra_data)
+
         self.logger.info('completed handling request', extra=message)

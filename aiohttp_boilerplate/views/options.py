@@ -76,17 +76,17 @@ class SchemaOptionsView(OptionsView):
 
         data = await self.get_request_data()
         if not data:
-            raise JSONHTTPError({'error': 'Empty data'})
+            raise JSONHTTPError(self.request, {'__error__': ['Empty data']})
 
         try:
             schema_result = schema().loads(data, partial=partial)
         except marshmallow.ValidationError as err:
-            raise JSONHTTPError(err.messages)
+            raise JSONHTTPError(self.request, err.messages)
         except Exception as err:
-            raise JSONHTTPError(err)
+            raise JSONHTTPError(self.request, err)
 
         return schema_result
-    
+
      # Return json schema for marshmellow form)
     def json_schema(self, schema):
         json_schema = JSONSchema()
@@ -156,7 +156,7 @@ class SchemaOptionsView(OptionsView):
                     return True
         return False
 
-    def add_fields_from_schema(self, _schema, _index="t0", t_index=1):
+    def add_fields_from_schema(self, _schema, _index="t0", t_index=1, parent_schema=""):
         _fields = []
         aliases = {'t0': ''}
         sql_tables = ''
@@ -173,8 +173,11 @@ class SchemaOptionsView(OptionsView):
                     't%d' % t_index,
                     field.joinOn
                 )
-                aliases['t{}'.format(t_index)] = name
-                nested_data = self.add_fields_from_schema(field.nested(), 't%d' % t_index)
+                if parent_schema != "":
+                    aliases['t{}'.format(t_index)] = "{}.{}".format(parent_schema, name)
+                else:
+                    aliases['t{}'.format(t_index)] = name
+                nested_data = self.add_fields_from_schema(field.nested(), 't%d' % t_index, t_index + 1, aliases["t{}".format(t_index)])
                 _fields.append(nested_data["fields"])
                 aliases.update(nested_data["aliases"])
                 sql_tables += nested_data["sql_tables"]
@@ -216,9 +219,6 @@ class SchemaOptionsView(OptionsView):
             return {}
 
         temp = {}
-        for k, v in aliases.items():
-            if v != '':
-                temp[v] = {}
         for k, v in raw_data.items():
             d = k.split('__')
             if len(d) == 1:
@@ -226,7 +226,12 @@ class SchemaOptionsView(OptionsView):
             elif aliases[d[0]] == '':
                 temp[d[1]] = v
             else:
-                temp[aliases[d[0]]][d[1]] = v
+                t = temp
+                for key in aliases[d[0]].split("."):
+                    if key not in t:
+                        t[key] = {}
+                    t = t[key]
+                t[d[1]] = v
 
         return temp
 
@@ -245,7 +250,7 @@ class ObjectView(SchemaOptionsView):
         if self.get_model() is None:
             warnings.warn('get_model return None', RuntimeWarning)
         else:
-            self.obj = self.get_model()(db_pool=request.app.db_pool)
+            self.obj = self.get_model()(db_pool=request.app.db_pool, log=request.log)
 
     # Return model object
     def get_model(self):
@@ -257,7 +262,7 @@ class ObjectView(SchemaOptionsView):
         id = self.request.match_info.get('id')
 
         if id is None:
-            raise JSONHTTPError({"__error__": "No id found"})
+            raise JSONHTTPError(self.request, {"__error__": ["No id found"]})
         # ToDo
         # Check if aiohttp can parse string/numeric data
         try:
@@ -279,7 +284,10 @@ class ObjectView(SchemaOptionsView):
             # Keep data in the bytes
             # data = self.schema().dump(raw_data)
             for f in self.schema().fields:
-                data[f] = getattr(obj, f)
+                if f == "data":
+                    data[f] = getattr(obj, f)["data"]
+                else:
+                    data[f] = getattr(obj, f)
         else:
             # ToDo
             # use obj from incoming parameter

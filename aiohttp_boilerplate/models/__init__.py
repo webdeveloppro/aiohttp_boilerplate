@@ -1,13 +1,13 @@
 from aiohttp import web
 
 from aiohttp_boilerplate.views import fixed_dump
-from aiohttp_boilerplate.views.exceptions import JSONHTTPError
 from aiohttp_boilerplate.sql import SQL
 
 
 class Manager:
 
-    def __init__(self, db_pool, is_list=False, storage=None):
+    def __init__(self, db_pool, is_list=False, storage=None, log=None):
+        self.log = log
         self.is_list = is_list
         self.db_pool = db_pool
 
@@ -29,7 +29,7 @@ class Manager:
         '''
         if storage is None:
             storage = SQL
-        self.sql = storage(table, db_pool)
+        self.sql = storage(table, db_pool, log=self.log)
 
     def __getattribute__(self, key):
         try:
@@ -72,7 +72,7 @@ class Manager:
         if self.is_list:
             for record in data:
                 # new_obj = {}  # not sure  self.__class__()
-                new_obj = self.__class__(db_pool=self.db_pool)
+                new_obj = self.__class__(db_pool=self.db_pool, log=self.log)
                 new_obj.set_data(dict(record))
                 self.data.append(new_obj)
         else:
@@ -87,9 +87,9 @@ class Manager:
 
         if (self.is_list and not self.data) or \
             (not self.is_list and self.id is None):
-            raise JSONHTTPError(
-                {'error': f'Object {self.__class__.__name__} not found by get_by_id'},
-                web.HTTPNotFound,
+            err_msg = "{'__error__':['Object %s not found by get_by_id']}" % self.__class__.__name__
+            raise web.HTTPNotFound(
+                text=err_msg,
             )
 
         return self
@@ -119,9 +119,9 @@ class Manager:
 
         if (self.is_list and not self.data) or \
             (not self.is_list and self.id is None):
-            raise JSONHTTPError(
-                {'error': f'Object {self.__class__.__name__} not found by get_by'},
-                web.HTTPNotFound,
+            err_msg = "{'__error__': ['Object %s not found by get_by']}" % self.__class__.__name__
+            raise web.HTTPNotFound(
+                text=err_msg,
             )
 
         return self
@@ -173,7 +173,7 @@ class Manager:
 
         if where == '':
             if self.id is None:
-                raise Exception('id is empty dont know how to update')
+                raise web.HTTPBadRequest(text="{'__error__':['id is empty dont know how to update']}")
             where = "id={id}"
             params = {'id': self.id}
 
@@ -226,7 +226,7 @@ class JsonbManager(Manager):
         if data and self.__key_name__ in data:
             self.set_data(data[self.__key_name__])
         else:
-            raise Exception('{"status": "No object updated"}')
+            raise web.HTTPBadRequest(text="{'__error__':['No object updated']}")
         return self.data
 
     async def insert(self, where, params, data):
@@ -259,7 +259,7 @@ class JsonbManager(Manager):
         result = await self.sql.execute(query, params)
         result = int(result.replace('UPDATE ', ''))
         if result == 0:
-            raise Exception('{"status": "No object updated"}')
+            raise web.HTTPBadRequest(text="{'__error__':['No object updated']}")
         return result
 
     async def update(self, where, params, data):

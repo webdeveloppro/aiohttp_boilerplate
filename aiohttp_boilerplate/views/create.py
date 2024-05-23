@@ -2,7 +2,7 @@ import logging
 from aiohttp import web
 
 from .options import ObjectView
-from .exceptions import JSONHTTPError, log
+from .exceptions import JSONHTTPError, logger_name
 
 
 class CreateView(ObjectView):
@@ -10,6 +10,9 @@ class CreateView(ObjectView):
 
     def __init__(self, request):
         super().__init__(request)
+        self.log = request.log
+        self.log.set_component_name(logger_name)
+        
         self.data = {}
 
     async def validate(self, data: dict) -> dict:
@@ -73,7 +76,7 @@ class CreateView(ObjectView):
         data = await self.validate(data)
 
         if len(data) == 0:
-            raise JSONHTTPError({'error': 'No content'}, web.HTTPBadRequest)
+            raise JSONHTTPError({'__error__': ['No content']}, web.HTTPBadRequest, request=self.request)
 
         self.data.update(await self.before_create(data))
         self.obj = await self.perform_create(
@@ -96,12 +99,14 @@ class CreateView(ObjectView):
                 if err.status_code >= 400 and err.status_code < 500:
                     raise err
 
-            log.error(err, exc_info=True)
+            self.log.error(err, exc_info=True)
             err_msg = 'HTTP Internal Server Error'
-            
-            if log.level == logging.DEBUG:
+
+            if self.log.level == logging.DEBUG:
                 err_msg = str(err)
-            
+
             raise JSONHTTPError(
-                {'error': err_msg}, web.HTTPInternalServerError
+                {'error': [err_msg]},
+                web.HTTPInternalServerError,
+                request=self.request
             ) from err

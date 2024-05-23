@@ -1,6 +1,13 @@
-import logging
 from aiohttp import web, hdrs
 
+
+def setup_cors_headers(headers, allow):
+    headers['Access-Control-Allow-Credentials'] = 'true'
+    headers['Access-Control-Allow-Origin'] = allow
+    headers['Access-Control-Allow-Methods'] = \
+        'GET, POST, PUT, OPTIONS, DELETE, PATCH'
+    headers['Access-Control-Allow-Headers'] = \
+        'Authorization, X-PINGOTHER, Content-Type, X-Requested-With, X-Request-ID, Vary'
 
 # Restrict access for conf['domain'] domain and subdomains only
 @web.middleware
@@ -13,14 +20,15 @@ async def cross_origin_rules(request, handler):
     if origin.count(domain) > 0:
         allow = origin
 
-    response = await handler(request)
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    response.headers['Access-Control-Allow-Origin'] = allow
-    response.headers['Access-Control-Allow-Methods'] = \
-        'GET, POST, PUT, OPTIONS, DELETE, PATCH'
-    response.headers['Access-Control-Allow-Headers'] = \
-        'Authorization, X-PINGOTHER, Content-Type, X-Requested-With'
+    # response = await handler(request)
+    try:
+        response = await handler(request)
+    except Exception as err:
+        if hasattr(err, 'headers'):
+            setup_cors_headers(err.headers, allow)
+        raise err
 
+    setup_cors_headers(response.headers, allow)
     return response
 
 
