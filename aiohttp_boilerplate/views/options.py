@@ -31,7 +31,7 @@ class OptionsView(web.View):
 
     # Read data from request and save in request_data
     async def get_request_data(self, to_json=False):
-        self.request.log.debug(f"Read data from request and save in request_data to_json=${to_json}")
+        self.request.log.debug(f"Read data from request and save in request_data to_json={to_json}")
         if self.request_data is None:
             self.request_data = await self.request.text()
 
@@ -69,10 +69,10 @@ class SchemaOptionsView(OptionsView):
         return None
 
     async def get_schema_data(self, partial=False, schema=None):
-        self.request.log.debug(f"partial=${partial}, schema=${schema}")
-
         if schema is None:
             schema = self.schema
+
+        self.request.log.debug(f"partial={partial}, schema={schema}")
 
         data = await self.get_request_data()
         if not data:

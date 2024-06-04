@@ -16,13 +16,13 @@ class CreateView(ObjectView):
         self.data = {}
 
     async def validate(self, data: dict) -> dict:
-        self.request.log.debug(f"data=${data}")
+        self.request.log.debug(f"data={data}")
         ''' Override that method for custom validation
         '''
         return data
 
     async def perform_create(self, data: dict) -> int:
-        self.request.log.debug(f"data=${data}")
+        self.request.log.debug(f"data={data}")
         ''' Runs after:
                 - successful validation method
                 - before_create method

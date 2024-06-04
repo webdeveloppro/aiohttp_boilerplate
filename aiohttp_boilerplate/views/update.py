@@ -19,13 +19,13 @@ class UpdateView(ObjectView):
         self.data = {}
 
     async def validate(self, data: dict) -> dict:
-        self.log.debug(f"data=${data}")
+        self.log.debug(f"data={data}")
         """ Override that method for custom validation
         """
         return data
 
     async def perform_update(self, where: str, params: dict, data: dict) -> dict:
-        self.log.debug("Perform update request", f"where=${where}, params=${params}, data=${data}")
+        self.log.debug("Perform update request", f"where={where}, params={params}, data={data}")
         ''' Runs after:
                 - successful validation method
                 - before_update method
@@ -34,7 +34,7 @@ class UpdateView(ObjectView):
         return await self.obj.update(where, params, data)
 
     async def before_update(self, data: dict) -> dict:
-        self.log.debug(f"data=${data}")
+        self.log.debug(f"data={data}")
         ''' Runs after:
                 - successful validation method
             If you want to change your data before system calls insert method
@@ -43,7 +43,7 @@ class UpdateView(ObjectView):
         return data
 
     async def after_update(self, data: dict) -> dict:
-        self.log.debug(f"data=${data}")
+        self.log.debug(f"data={data}")
         ''' Runs after:
                 - successful validation method
                 - before_create method
