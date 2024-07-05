@@ -72,12 +72,13 @@ class SchemaOptionsView(OptionsView):
         if schema is None:
             schema = self.schema
 
-        self.request.log.debug(f"partial={partial}, schema={schema}")
+        self.request.log.debug(f"schema={schema}")
 
         data = await self.get_request_data()
         if not data:
             raise JSONHTTPError(self.request, {'__error__': ['Empty data']})
 
+        self.request.log.debug(f"validate data=${data}, partial=${partial}")
         try:
             schema_result = schema().loads(data, partial=partial)
         except marshmallow.ValidationError as err:
