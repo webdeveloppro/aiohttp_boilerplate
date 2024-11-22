@@ -39,7 +39,6 @@ class Choice(fields.Raw):
         else:
             v.append(validate.OneOf(
                 [x for x in choices],
-                [choices[x] for x in choices],
             ))
         kwargs['validate'] = v
         super().__init__(**kwargs)
@@ -63,7 +62,7 @@ class ChoiceConst(Choice):
         file_name = file_name.replace('.', '/')
         file_path = const_folder + '/' + file_name + '.json'
         data = json.loads(open(file_path).read())
-        choices = [x["code"] for x in data.get(const_name, data)]
+        choices = data.get(const_name, data)
         self.const_file = const_file
         super().__init__(choices, **kwargs)
 
