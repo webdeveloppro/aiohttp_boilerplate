@@ -48,7 +48,7 @@ class CreateView(ObjectView):
 
             object id is self.obj.id
         '''
-        pass
+        return {}
 
     async def get_data(self, obj) -> dict:
         ''' Return id of the object '''
@@ -83,7 +83,7 @@ class CreateView(ObjectView):
             data=self.data,
         )
 
-        await self.after_create(data)
+        self.data.update(await self.after_create(data) or {})
         response = await self.get_data(self.obj)
         return self.json_response(response, 201)
 
