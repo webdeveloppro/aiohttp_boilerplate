@@ -10,4 +10,6 @@ class ServiceContext(object):
 class Context(object):
     request_id: str
     user: str
+    version: str
+    service_name: str
     service_context: ServiceContext

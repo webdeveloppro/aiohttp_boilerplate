@@ -1,3 +1,4 @@
+import os
 import logging
 
 from aiohttp.web import Request
@@ -121,6 +122,8 @@ class GCPLogger(logging.Logger):
                     extra["serviceContext"]["msg_id"] = self.request.context.request_id
                 if hasattr(self.request.context, "extra_data"):
                     extra["serviceContext"].update(self.request.context.extra_data)
+        if "service_name" not in extra["serviceContext"]:
+            extra["serviceContext"]["service_name"] = os.getenv("SERVICE_NAME")
 
         # Add severity for GCP monitoring
         extra["level"] = GCPSeverityMap[level].lower()

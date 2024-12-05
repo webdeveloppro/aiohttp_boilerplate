@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from datetime import datetime
@@ -66,6 +65,12 @@ class AccessLoggerRequestResponse(AbstractAccessLogger):
             if hasattr(request.context, "request_id"):
                 message["serviceContext"]["request_id"] = request.context.request_id
             if hasattr(request.context, "extra_data"):
-                message["serviceContext"].update(request.context.extra_data)
+                message["serviceContext"]["extra_data"] = request.context.extra_data
+            if hasattr(request.context, "service_name"):
+                message["serviceContext"]["service_name"] = request.context.service_name
+            if hasattr(request.context, "version"):
+                message["serviceContext"]["version"] = request.context.version
+            if hasattr(request.context, "sourceReference"):
+                message["serviceContext"]["sourceReference"] = request.context.sourceReference
 
         self.logger.info('completed handling request', extra=message)
