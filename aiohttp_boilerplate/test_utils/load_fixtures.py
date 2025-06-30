@@ -48,9 +48,7 @@ class LoadFixture:
             self.table = t
 
     async def truncate(self, con):
-        ''' Truncate table and cascade tables '''
         await con.execute(f"TRUNCATE {self.table} CASCADE")
-
 
     async def file2db(self, con):
         ''' Read data from file and save in the data array '''

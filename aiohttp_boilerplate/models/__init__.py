@@ -22,6 +22,9 @@ class Manager:
 
         self.set_storage(self.table, storage, self.db_pool)
 
+    def items(self):
+        return self.data.items()
+
     def set_storage(self, table, storage, db_pool):
         '''
         Will set a storage for model
