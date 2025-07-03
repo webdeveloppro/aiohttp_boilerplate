@@ -79,3 +79,17 @@ class FileRow(Schema):
 class FolderRow(Schema):
     files = fields.Nested(FileRow, required=True, many=True)
     meta_data = fields.Dict()
+
+
+class FilerFile(fields.Integer):
+    READBLE_FILE = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "application/vnd.oasis.opendocument.text"
+    ]
+
+    pass
