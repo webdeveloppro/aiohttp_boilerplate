@@ -56,7 +56,7 @@ class LoadFixture:
 
         self.data = json.loads(open(filename, 'r').read())
 
-        await con.execute(f"DELETE FROM {self.table}; select setval('{self.table}_id_seq',(select max(id) from {self.table}));")
+        await con.execute(f"DELETE FROM {self.table}; select setval('{self.table}_id_seq',(select max(id) from {self.table})); ALTER SEQUENCE {self.table}_id_seq RESTART WITH 1;")
 
         for row in self.data:
             field_names = []
