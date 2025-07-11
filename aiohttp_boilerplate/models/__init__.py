@@ -4,6 +4,7 @@ from aiohttp_boilerplate.views import fixed_dump, JSONHTTPError
 from aiohttp_boilerplate.sql import SQL
 
 
+# iterator protocol
 class Manager:
 
     def __init__(self, db_pool, is_list=False, storage=None, log=None):
@@ -24,6 +25,9 @@ class Manager:
 
     def items(self):
         return self.data.items()
+
+    def __getitem__(self, key):
+         return self.data[key]
 
     def set_storage(self, table, storage, db_pool):
         '''
@@ -80,6 +84,15 @@ class Manager:
                 self.data.append(new_obj)
         else:
             self.data.update(data)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self): # Python 2: def next(self)
+        self.current += 1
+        if self.current < self.high:
+            return self.current
+        raise StopIteration
 
     async def get_by_id(self, id, fields="*"):
 
