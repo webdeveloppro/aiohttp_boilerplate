@@ -82,6 +82,7 @@ class FolderRow(Schema):
 
 
 class FilerFile(fields.Integer):
+    SIZE_10_MB = 10 * 1024 * 1024
     READBLE_FILE = [
         "application/pdf",
         "application/msword",
@@ -92,4 +93,3 @@ class FilerFile(fields.Integer):
         "application/vnd.oasis.opendocument.text"
     ]
 
-    pass
