@@ -4,3 +4,9 @@ version = "0.7.2"
 description = ""
 authors = ["Vladyslav Tarasenko <vladka@webdevelop.pro>", "Artem Tiumentcev <artem@webdevelop.pro>", "George Shapchits <george_g@webdevelop.pro>"]
 license = "MIT"
+
+[project]
+dependencies = [
+  "aiohttp>=3.13",
+  "aiohttp-apispec @ https://github.com/webdeveloppro/aiohttp-apispec/archive/refs/tags/v1.0.0.tar.gz",
+]
