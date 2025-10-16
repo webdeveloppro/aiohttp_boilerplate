@@ -9,4 +9,4 @@ ujson>=5.11.0
 aiocache>=0.12.2
 django_environ>=0.11.2
 python-json-logger>=2.0.7
-git+https://github.com/webdevelop-pro/aiohttp-apispec@a4f2229707226533c482d445747782750590e832#egg=aiohttp_apispec
+https://github.com/webdevelop-pro/aiohttp-apispec/archive/refs/tags/v1.0.0.tar.gz
