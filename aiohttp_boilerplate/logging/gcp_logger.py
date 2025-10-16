@@ -110,7 +110,7 @@ class GCPLogger(logging.Logger):
                 # "latency": "",
                 "protocol": self.request.scheme
             }
-            if self.response and self.response.code:
+            if self.response and hasattr(self.response, 'code'):
                 extra["serviceContext"]["httpRequest"]["responseStatusCode"] = self.response.code
 
             extra["serviceContext"]["user"] = self.request.headers.get("Authorization")
