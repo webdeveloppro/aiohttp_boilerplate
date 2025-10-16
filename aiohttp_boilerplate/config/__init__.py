@@ -40,6 +40,8 @@ def get_config(name=None):
             },
             'hostname': env.str('HOSTNAME', ''),
             'AIOCACHE_DISABLE': env.bool('AIOCACHE_DISABLE', False),
+            'APISPEC': env.bool('APISPEC', False),
+            'APISPEC_PATH': env.str('APISPEC_PATH', "/docs"),
             'app_dir': env.str('APP_DIR', 'app'),
             'domain': env.str('DOMAIN'),
             'AUTH_URL': env.str('AUTH_URL', ''), # ToDo move to auth service

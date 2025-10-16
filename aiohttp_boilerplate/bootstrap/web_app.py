@@ -2,6 +2,9 @@ import importlib
 
 from aiohttp import web, web_app
 
+from aiohttp_apispec import (
+    setup_aiohttp_apispec,
+)
 
 async def on_cleanup(app):
     await app.db_pool.close()
@@ -9,6 +12,7 @@ async def on_cleanup(app):
 
 async def on_prepare(request, response):
     pass
+
 
 def start_web_app(conf, db_pool, loop=None) -> web_app.Application:
     middlewares = []
@@ -39,4 +43,8 @@ def start_web_app(conf, db_pool, loop=None) -> web_app.Application:
 
     routes = importlib.import_module(conf['app_dir'] + '.routes')
     routes.setup_routes(app)
+
+    if conf.get("APISPEC") is True:
+        setup_aiohttp_apispec(app, swagger_path=conf.get("APISPEC_PATH"))
+
     return app
