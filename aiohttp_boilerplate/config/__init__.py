@@ -38,10 +38,17 @@ def get_config(name=None):
                 # ToDo
                 # Add DB_SSL_MODE parameter
             },
+            'openapi_enabled': env.bool('OPENAPI', False),
+            'openapi': {
+                'title': env.str('OPENAPI_TITLE', "/docs"),
+                'version': env.str('OPENAPI_VERSION', "1.0.0"),
+                'url': env.str('OPENAPI_URL', "/api/docs/swagger.json",),
+                'swagger_path': env.str('OPENAPI_PATH', "/docs"),
+                'description': env.str('OPENAPI_DESCRIPTION', ""),
+                'openapi_version': env.str('OPENAPI_VERSION', "3.0.3"),
+            },
             'hostname': env.str('HOSTNAME', ''),
             'AIOCACHE_DISABLE': env.bool('AIOCACHE_DISABLE', False),
-            'APISPEC': env.bool('APISPEC', False),
-            'APISPEC_PATH': env.str('APISPEC_PATH', "/docs"),
             'app_dir': env.str('APP_DIR', 'app'),
             'domain': env.str('DOMAIN'),
             'AUTH_URL': env.str('AUTH_URL', ''), # ToDo move to auth service

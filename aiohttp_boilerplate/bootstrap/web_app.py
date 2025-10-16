@@ -44,7 +44,7 @@ def start_web_app(conf, db_pool, loop=None) -> web_app.Application:
     routes = importlib.import_module(conf['app_dir'] + '.routes')
     routes.setup_routes(app)
 
-    if conf.get("APISPEC") is True:
-        setup_aiohttp_apispec(app, swagger_path=conf.get("APISPEC_PATH"))
+    if conf.get("openapi_enabled") is True:
+        setup_aiohttp_apispec(app, **conf['openapi'])
 
     return app
