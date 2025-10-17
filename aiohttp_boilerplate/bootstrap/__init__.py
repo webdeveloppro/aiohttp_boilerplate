@@ -19,7 +19,12 @@ __all__ = ('web_app', 'console_app', 'get_loop',)
 
 
 def get_loop() -> asyncio.AbstractEventLoop:
-    return asyncio.get_event_loop()
+    try:
+        return asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
 
 def console_app(loop=None):
     if loop is None:
